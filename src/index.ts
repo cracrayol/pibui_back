@@ -5,6 +5,8 @@ import * as bodyParser from 'body-parser';
 import { userRouter } from './routers/user.router';
 import { movieRouter } from './routers/movie.router';
 import { tokenGuard } from './middlewares/token-guard';
+import { searchRouter } from './routers/search.router';
+
 const app = express();
 const port = 4300;
 
@@ -12,6 +14,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 app.use('/movie', movieRouter);
+app.use('/search', searchRouter);
 app.use('/', userRouter);
 
 // Unprotected Get
