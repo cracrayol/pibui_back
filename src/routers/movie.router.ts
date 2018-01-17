@@ -9,6 +9,23 @@ import { randomBytes } from 'crypto';
 
 export const movieRouter = Router();
 
+movieRouter.get('/latest', (req: Request, res: Response) => {
+    Movie.findAll({
+        where: {
+            valid: true,
+            hidden: false,
+            errorCount: {
+                [sequelize.Op.lt]: 5
+            }
+        },
+        order: [['validDate', 'DESC']],
+        limit: 30,
+        include: [Author, Tag]
+    }).then(movie => {
+        res.send(movie);
+    });
+});
+
 movieRouter.get('/:id', (req: Request, res: Response) => {
     if (req.params.id && req.params.id > 0) {
         Movie.findOne({
