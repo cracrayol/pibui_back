@@ -10,9 +10,7 @@ export const userRules = {
             .isEmail().withMessage('Invalid email format')
             .custom(email => User.find({ where: { email } }).then(u => !!!u)).withMessage('Email exists'),
         check('password')
-            .isLength({ min: 8 }).withMessage('Invalid password'),
-        check('confirmPassword')
-            .custom((confirmPassword, { req }) => req.body.password === confirmPassword).withMessage('Passwords are different')
+            .isLength({ min: 8 }).withMessage('Invalid password')
     ],
     forLogin: [
         check('email')
