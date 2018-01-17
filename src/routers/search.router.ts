@@ -1,21 +1,19 @@
-// src/routers/user.router.ts
-
 import { Op } from 'sequelize';
-import { Router, Request, Response } from 'express'
+import { Router, Request, Response } from 'express';
 import { Movie, MovieModel } from '../models/movie';
 import { sequelize } from '../instances/sequelize';
 import { Author } from '../models/author';
 import { Tag } from '../models/tag';
 import { randomBytes } from 'crypto';
-import * as Promise from "bluebird";
+import * as Promise from 'bluebird';
 
 export const searchRouter = Router();
 
 searchRouter.get('/:search', (req: Request, res: Response) => {
-    let searchList: string[] = req.params.search.split(" ");
+    const searchList: string[] = req.params.search.split(' ');
     const searchQueries: Promise<MovieModel[]>[] = [];
     searchList.forEach(value => {
-        if(value.length < 4) {
+        if (value.length < 4) {
             // no search if word if below 4 characters
             return;
         }
@@ -43,7 +41,7 @@ searchRouter.get('/:search', (req: Request, res: Response) => {
                 },
             }]
         }));
-    })
+    });
 
     const movieList: Set<MovieModel> = new Set<MovieModel>();
     Promise.all(searchQueries).then(result => {

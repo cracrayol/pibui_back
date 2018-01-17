@@ -6,14 +6,14 @@ import * as Bluebird from 'Bluebird';
 import { User, UserModel, UserAddModel, UserViewModel } from '../models/user';
 
 export class UserService {
+    private static _user;
+
     private readonly _saltRounds = 12;
     private readonly _jwtSecret = '0.rfyj3n9nzh';
 
     static get userAttributes() {
         return ['id', 'email'];
     }
-
-    private static _user
 
     static get user() {
         return UserService._user;
@@ -44,7 +44,7 @@ export class UserService {
                 UserService._user = User.findById(decoded['id']);
                 resolve(true);
                 return;
-            })
+            });
         }) as Promise<boolean>;
     }
 

@@ -1,4 +1,4 @@
-import { randomBytes } from 'crypto'
+import { randomBytes } from 'crypto';
 
 export function rand(min = 0, max = 0x7FFFFFFF) {
     const diff = max - min;

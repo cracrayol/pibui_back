@@ -25,4 +25,4 @@ export const Tag = sequelize.define<TagModel, TagAddModel>('tag', {
     valid: Sequelize.BOOLEAN
 });
 
-//Tag.belongsToMany(Movie, { through: 'MovieTags' });
+// Tag.belongsToMany(Movie, { through: 'MovieTags' });

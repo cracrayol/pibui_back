@@ -1,6 +1,4 @@
-// src/routers/user.router.ts
-
-import { Router, Request, Response } from 'express'
+import { Router, Request, Response } from 'express';
 import { Movie } from '../models/movie';
 import { sequelize } from '../instances/sequelize';
 import { Author } from '../models/author';
@@ -42,16 +40,14 @@ movieRouter.get('/:id', (req: Request, res: Response) => {
             res.send(movie);
         });
     } else {
-        let where = {
-            valid: true,
-            hidden: false,
-            errorCount: {
-                [sequelize.Op.lt]: 5
-            }
-        }
-
         Movie.count({
-            where: where
+            where: {
+                valid: true,
+                hidden: false,
+                errorCount: {
+                    [sequelize.Op.lt]: 5
+                }
+            }
         }).then(cnt => {
             Movie.findOne({
                 where: {

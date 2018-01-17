@@ -19,7 +19,7 @@ export const userRules = {
         check('password')
             .custom((password, { req }) => {
                 return User.findOne({ where: { email: req.body.email } })
-                    .then(u => bcrypt.compare(password, u!.password))
+                    .then(u => bcrypt.compare(password, u!.password));
             }).withMessage('Invalid email or password')
     ]
-}
+};
