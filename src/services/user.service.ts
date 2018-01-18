@@ -30,7 +30,12 @@ export class UserService {
     login({ email }: UserAddModel) {
         return User.findOne({ where: { email } }).then(u => {
             const { id, email } = u!;
-            return { token: jwt.sign({ id, email }, this._jwtSecret) };
+            const exp = Math.floor(Date.now() / 1000) + (60 * 60);
+            return {
+                token: jwt.sign({ id, email }, this._jwtSecret, { expiresIn: 60 * 60 }),
+                expiresIn: exp,
+                user: { id, email }
+            };
         });
     }
 
