@@ -39,20 +39,6 @@ export class UserService {
         });
     }
 
-    verifyToken(token: string) {
-        return new Promise((resolve, reject) => {
-            jwt.verify(token, this._jwtSecret, (err, decoded) => {
-                if (err) {
-                    resolve(false);
-                    return;
-                }
-                UserService._user = User.findById(decoded['id']);
-                resolve(true);
-                return;
-            });
-        }) as Promise<boolean>;
-    }
-
     getUserById(id: number) {
         return User.findById(id, {
             attributes: UserService.userAttributes
