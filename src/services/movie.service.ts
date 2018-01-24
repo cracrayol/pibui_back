@@ -1,41 +1,23 @@
-// src/services/user.service.ts
-
-import * as bcrypt from 'bcrypt';
-import * as jwt from 'jsonwebtoken';
-import * as Bluebird from 'Bluebird';
-import { Movie } from '../models/movie';
-import { sequelize } from '../instances/sequelize';
-import { Author } from '../models/author';
-import { Tag } from '../models/tag';
+import { connection } from '../index';
+import { Movie } from '../entity/movie';
 
 export class MovieService {
 
     getAll(limit?: number) {
-        return Movie.findAll({
-            where: {
-                valid: true,
-                hidden: false,
-                errorCount: {
-                    [sequelize.Op.lt]: 5
-                }
-            },
-            order: [['validDate', 'DESC']],
-            limit,
-            include: [Author, Tag]
-        });
+        return connection.createQueryBuilder(Movie, 'movie')
+            .where('movie.valid = 1 AND movie.hidden = 0 AND movie.errorCount < 5')
+            .leftJoinAndSelect('movie.tags', 'tag')
+            .leftJoinAndSelect('movie.author', 'author')
+            .take(limit)
+            .orderBy('movie.validDate', 'DESC')
+            .getMany();
     }
 
     getById(id: number) {
-        return Movie.findOne({
-            where: {
-                id: id,
-                valid: true,
-                hidden: false,
-                errorCount: {
-                    [sequelize.Op.lt]: 5
-                }
-            },
-            include: [Author, Tag]
-        });
+        return connection.createQueryBuilder(Movie, 'movie')
+            .where('movie.valid = 1 AND movie.hidden = 0 AND movie.errorCount < 5 AND movie.id = :id', { id })
+            .leftJoinAndSelect('movie.tags', 'tag')
+            .leftJoinAndSelect('movie.author', 'author')
+            .getOne();
     }
 }

@@ -1,5 +1,4 @@
 import { Router, Request, Response } from 'express';
-import { randomBytes } from 'crypto';
 import { PlaylistService } from '../services/playlist.service';
 import { IncomingHttpHeaders } from 'http';
 import { UserService } from '../services/user.service';

@@ -1,47 +1,45 @@
-// src/services/user.service.ts
-
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
-import * as Bluebird from 'Bluebird';
-import { User, UserModel, UserAddModel, UserViewModel } from '../models/user';
+import { connection } from '../index';
+import { User } from '../entity/user';
 
 export class UserService {
-    private static _user;
-
     private readonly _saltRounds = 12;
     private readonly _jwtSecret = '0.rfyj3n9nzh';
 
-    static get userAttributes() {
-        return ['id', 'email'];
-    }
-
-    static get user() {
-        return UserService._user;
-    }
-
-    register({ email, password }: UserAddModel) {
+    register({ email, password }: User) {
         return bcrypt.hash(password, this._saltRounds)
             .then(hash => {
-                return User.create({ email, password: hash })
-                    .then(u => this.getUserById(u!.id));
+                return connection.createQueryBuilder()
+                    .insert().into(User)
+                    .values([{ email, password: hash }])
+                    .execute();
             });
     }
 
-    login({ email }: UserAddModel) {
-        return User.findOne({ where: { email } }).then(u => {
-            const { id, email } = u!;
-            const exp = Math.floor(Date.now() / 1000) + (60 * 60);
-            return {
-                token: jwt.sign({ id, email }, this._jwtSecret, { expiresIn: 60 * 60 }),
-                expiresIn: exp,
-                user: { id, email }
-            };
-        });
+    login({ email }: User) {
+        return connection.createQueryBuilder(User, 'user')
+            .where('user.email = :email', { email })
+            .getOne().then(u => {
+                const { id, email } = u!;
+                const exp = Math.floor(Date.now() / 1000) + (60 * 60);
+                return {
+                    token: jwt.sign({ id, email }, this._jwtSecret, { expiresIn: 60 * 60 }),
+                    expiresIn: exp,
+                    user: { id, email }
+                };
+            });
     }
 
-    getUserById(id: number) {
-        return User.findById(id, {
-            attributes: UserService.userAttributes
-        }) as Bluebird<UserViewModel>;
+    getById(id: number) {
+        return connection.createQueryBuilder(User, 'user')
+            .where('user.id = :id', { id })
+            .getOne();
+    }
+
+    getByEmail(email: string) {
+        return connection.createQueryBuilder(User, 'user')
+            .where('user.email = :email', { email })
+            .getOne();
     }
 }

@@ -1,24 +1,24 @@
-// src/rules/user.rules.ts
-
 import * as bcrypt from 'bcrypt';
 import { check } from 'express-validator/check';
-import { User } from '../models/user';
+import { UserService } from '../services/user.service';
+
+const userService = new UserService();
 
 export const userRules = {
     forRegister: [
         check('email')
             .isEmail().withMessage('Invalid email format')
-            .custom(email => User.find({ where: { email } }).then(u => !!!u)).withMessage('Email exists'),
+            .custom(email => userService.getByEmail(email).then(u => !!!u)).withMessage('Email exists'),
         check('password')
             .isLength({ min: 8 }).withMessage('Invalid password')
     ],
     forLogin: [
         check('email')
             .isEmail().withMessage('Invalid email format')
-            .custom(email => User.findOne({ where: { email } }).then(u => !!u)).withMessage('Invalid email or password'),
+            .custom(email => userService.getByEmail(email).then(u => !!u)).withMessage('Invalid email or password'),
         check('password')
             .custom((password, { req }) => {
-                return User.findOne({ where: { email: req.body.email } })
+                return userService.getByEmail(req.body.email)
                     .then(u => bcrypt.compare(password, u!.password));
             }).withMessage('Invalid email or password')
     ]
