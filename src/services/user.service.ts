@@ -2,6 +2,7 @@ import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 import { connection } from '../index';
 import { User } from '../entity/user';
+import { configuration } from '../configuration';
 
 export class UserService {
     private readonly _saltRounds = 12;
@@ -22,10 +23,9 @@ export class UserService {
             .where('user.email = :email', { email })
             .getOne().then(u => {
                 const { id, email } = u!;
-                const exp = Math.floor(Date.now() / 1000) + (60 * 60);
                 return {
-                    token: jwt.sign({ id, email }, this._jwtSecret, { expiresIn: 60 * 60 }),
-                    expiresIn: exp,
+                    token: jwt.sign({ id, email }, this._jwtSecret, { expiresIn: configuration.session.maxAge }),
+                    expiresIn: configuration.session.maxAge,
                     user: { id, email }
                 };
             });

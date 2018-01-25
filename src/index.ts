@@ -6,7 +6,7 @@ import * as bodyParser from 'body-parser';
 import * as session from 'express-session';
 import * as MySQLStore from 'express-mysql-session';
 
-import { configuration } from './conf';
+import { configuration } from './configuration';
 import { userRouter } from './routers/user.router';
 import { movieRouter } from './routers/movie.router';
 import { searchRouter } from './routers/search.router';
@@ -23,10 +23,13 @@ createConnection(configuration.typeOrm).then(conn => {
     app.use(express.static('public'));
     app.use(session({
         secret: 'keyboard cat',
-        store: new MySQLStore(configuration.session),
+        store: new MySQLStore(configuration.sessionStore),
         resave: false, // we support the touch method so per the express-session docs this should be set to false
         proxy: true,
-        saveUninitialized: false
+        saveUninitialized: false,
+        cookie: {
+            maxAge: configuration.session.maxAge * 1000
+        }
     }));
 
     app.use(bodyParser.json());
