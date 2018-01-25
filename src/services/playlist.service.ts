@@ -5,9 +5,9 @@ export class PlaylistService {
 
     getAll(userId: number) {
         return connection.createQueryBuilder(Playlist, 'playlist')
-            .where('playlist.userId = :id', { userId })
+            .where('playlist.userId = :userId', { userId })
             .leftJoinAndSelect('playlist.tags', 'tag')
-            .orderBy('name', 'ASC')
+            .orderBy('playlist.name', 'ASC')
             .getMany();
     }
 
