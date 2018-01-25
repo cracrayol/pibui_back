@@ -6,6 +6,7 @@ import * as bodyParser from 'body-parser';
 import * as session from 'express-session';
 import * as MySQLStore from 'express-mysql-session';
 
+import { configuration } from './conf';
 import { userRouter } from './routers/user.router';
 import { movieRouter } from './routers/movie.router';
 import { searchRouter } from './routers/search.router';
@@ -14,20 +15,15 @@ import { createConnection, Connection } from 'typeorm';
 
 export let connection: Connection;
 
-createConnection().then(conn => {
+createConnection(configuration.typeOrm).then(conn => {
     connection = conn;
 
     const app = express();
-    const port = 4300;
+
+    app.use(express.static('public'));
     app.use(session({
         secret: 'keyboard cat',
-        store: new MySQLStore({
-            host: 'localhost',
-            port: 3306,
-            user: 'root',
-            password: '',
-            database: 'pibui'
-        }),
+        store: new MySQLStore(configuration.session),
         resave: false, // we support the touch method so per the express-session docs this should be set to false
         proxy: true,
         saveUninitialized: false
@@ -35,17 +31,14 @@ createConnection().then(conn => {
 
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: true }));
-    app.use(cors({
-        origin: 'http://127.0.0.1:4200',
-        credentials: true
-    }));
+    app.use(cors(configuration.cors));
 
     app.use('/movie', movieRouter);
     app.use('/search', searchRouter);
     app.use('/playlist', playlistRouter);
     app.use('/', userRouter);
 
-    app.listen(port, () => {
-        console.log(`App is listening on port ${port}`);
+    app.listen(configuration.express.listenPort, () => {
+        console.log(`App is listening on port ${configuration.express.listenPort}`);
     });
 });
