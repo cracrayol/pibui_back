@@ -1,10 +1,12 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, ManyToMany, JoinTable, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+    Entity, Column, PrimaryGeneratedColumn, ManyToOne, ManyToMany, JoinTable, CreateDateColumn, UpdateDateColumn, BaseEntity
+} from 'typeorm';
 import { User } from './user';
 import { Tag } from './tag';
 import { Author } from './author';
 
 @Entity()
-export class Movie {
+export class Movie extends BaseEntity {
 
     @PrimaryGeneratedColumn()
     id: number;
@@ -40,7 +42,7 @@ export class Movie {
     author: Author;
 
     @ManyToMany(type => Tag)
-    @JoinTable({name: 'movie_tag'})
+    @JoinTable({ name: 'movie_tag' })
     tags: Tag[];
 
     @CreateDateColumn()

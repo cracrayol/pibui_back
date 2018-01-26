@@ -1,8 +1,8 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, CreateDateColumn, UpdateDateColumn, BaseEntity } from 'typeorm';
 import { Movie } from './movie';
 
 @Entity()
-export class Author {
+export class Author extends BaseEntity {
 
     @PrimaryGeneratedColumn()
     id: number;
