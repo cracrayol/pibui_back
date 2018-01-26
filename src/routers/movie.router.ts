@@ -14,6 +14,7 @@ movieRouter.get('/latest', (req: Request, res: Response) => {
 
 movieRouter.get('/:id', (req: Request, res: Response) => {
     if (req.params.id && req.params.id > 0) {
+        movieService.getById(req.params.id).then(movie => res.json(movie));
     } else {
         const idFilter = [];
         if (req.session.playedMovies) {
@@ -21,10 +22,10 @@ movieRouter.get('/:id', (req: Request, res: Response) => {
         }
 
         return connection.createQueryBuilder(Movie, 'movie').select('COUNT(*)', 'count')
-            .where('movie.valid = 1 AND movie.hidden = false AND movie.errorCount < 5')
+            .where('movie.valid = 1 AND movie.hidden = false AND movie.errorCount < 5 AND movie.id NOT IN :idFilter', {idFilter})
             .getRawOne().then((result: { count: number }) => {
                 connection.createQueryBuilder(Movie, 'movie')
-                    .where('movie.valid = 1 AND movie.hidden = false AND movie.errorCount < 5')
+                    .where('movie.valid = 1 AND movie.hidden = false AND movie.errorCount < 5 AND movie.id NOT IN :idFilter', {idFilter})
                     .offset(rand(0, result.count) - 1)
                     .orderBy('movie.id', 'ASC')
                     .limit(1)
