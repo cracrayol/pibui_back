@@ -4,6 +4,10 @@ export const configuration = {
     express: {
         'listenPort': 4300
     },
+    jwt: {
+        secret: '0.rfyj3n9nzh',
+        saltRounds: 12
+    },
     session: {
         maxAge: 3600
     },
