@@ -25,6 +25,5 @@ userRouter.post('/login', userRules['forLogin'], (req, res) => {
         return res.status(422).json(errors.array());
     }
     const payload = matchedData(req) as User;
-    const token = userService.login(payload);
-    return token.then(t => res.json(t));
+    return userService.login(payload).then(t => res.json(t));
 });

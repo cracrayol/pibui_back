@@ -6,7 +6,9 @@ export class PlaylistService {
     getAll(userId: number) {
         return connection.createQueryBuilder(Playlist, 'playlist')
             .where('playlist.userId = :userId', { userId })
-            .leftJoinAndSelect('playlist.tags', 'tag')
+            .leftJoinAndSelect('playlist.forbiddenTags', 'forbiddenTags')
+            .leftJoinAndSelect('playlist.allowedTags', 'allowedTags')
+            .leftJoinAndSelect('playlist.mandatoryTags', 'mandatoryTags')
             .orderBy('playlist.name', 'ASC')
             .getMany();
     }
@@ -14,7 +16,9 @@ export class PlaylistService {
     getById(id: number) {
         return connection.createQueryBuilder(Playlist, 'playlist')
             .where('playlist.id = :id', { id })
-            .leftJoinAndSelect('playlist.tags', 'tag')
+            .leftJoinAndSelect('playlist.forbiddenTags', 'forbiddenTags')
+            .leftJoinAndSelect('playlist.allowedTags', 'allowedTags')
+            .leftJoinAndSelect('playlist.mandatoryTags', 'mandatoryTags')
             .getOne();
     }
 }
