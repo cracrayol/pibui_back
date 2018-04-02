@@ -32,13 +32,16 @@ export const configuration = {
         synchronize: true,
         logging: true,
         entities: [
-            __dirname + '/entity/**/*.ts'
+            __dirname + '/entity/**/*.ts',
+            __dirname + '/entity/**/*.js'
         ],
         migrations: [
-            __dirname + '/migration/**/*.ts'
+            __dirname + '/migration/**/*.ts',
+            __dirname + '/migration/**/*.js'
         ],
         subscribers: [
-            __dirname + '/subscriber/**/*.ts'
+            __dirname + '/subscriber/**/*.ts',
+            __dirname + '/subscriber/**/*.js'
         ]
     }
 };
