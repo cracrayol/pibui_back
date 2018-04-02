@@ -21,11 +21,16 @@ movieRouter.get('/:id', (req: Request, res: Response) => {
             idFilter.push(req.session.playedMovies);
         }
 
+        let query = 'movie.valid = 1 AND movie.hidden = false AND movie.errorCount < 5';
+        if (idFilter.length > 0) {
+            query += ' AND movie.id NOT IN :idFilter';
+        }
+
         return connection.createQueryBuilder(Movie, 'movie').select('COUNT(*)', 'count')
-            .where('movie.valid = 1 AND movie.hidden = false AND movie.errorCount < 5 AND movie.id NOT IN :idFilter', {idFilter})
+            .where(query, { idFilter })
             .getRawOne().then((result: { count: number }) => {
                 connection.createQueryBuilder(Movie, 'movie')
-                    .where('movie.valid = 1 AND movie.hidden = false AND movie.errorCount < 5 AND movie.id NOT IN :idFilter', {idFilter})
+                    .where(query, { idFilter })
                     .offset(rand(0, result.count) - 1)
                     .orderBy('movie.id', 'ASC')
                     .limit(1)
