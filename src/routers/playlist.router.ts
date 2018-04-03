@@ -26,6 +26,7 @@ playlistRouter.put('/:id', jwt({ secret: configuration.jwt.secret, credentialsRe
             console.log(playlistRequest);
             playlist.current = playlistRequest.current ? playlistRequest.current : false;
             playlist.name = playlistRequest.name;
+            playlist.public = playlistRequest.public;
             playlist.allowedTags = playlistRequest.allowedTags;
             playlist.mandatoryTags = playlistRequest.mandatoryTags;
             playlist.forbiddenTags = playlistRequest.forbiddenTags;

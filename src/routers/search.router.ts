@@ -14,7 +14,7 @@ searchRouter.get('/:search', (req: Request, res: Response) => {
             return;
         }
         searchQueries.push(
-            connection.createQueryBuilder().select().from(Movie, 'movie')
+            connection.createQueryBuilder(Movie, 'movie')
                 .leftJoinAndSelect('movie.author', 'author')
                 .where('movie.valid = 1 AND movie.hidden = 0 AND (movie.title LIKE :search OR author.name LIKE :search)',
                 { search: '%' + value + '%' })
