@@ -8,7 +8,7 @@
         "build": "tsc",
         "watch": "tsc && concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run watch-node\"",
         "watch-ts": "tsc -w",
-        "watch-node": "nodemon ./build/index.js",
+        "watch-node": "nodemon --inspect ./build/index.js",
         "lint": "tslint --project ./tslint.json"
     },
     "author": "cracrayol",
