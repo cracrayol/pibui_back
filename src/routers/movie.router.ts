@@ -1,8 +1,11 @@
 import { Router, Request, Response } from 'express';
 import { MovieService } from '../services/movie.service';
 import { randomBytes } from 'crypto';
+import * as jwt from 'express-jwt';
 import { connection } from '../index';
 import { Movie } from '../entity/movie';
+import { Playlist } from '../entity/playlist';
+import { configuration } from '../configuration';
 
 export const movieRouter = Router();
 
@@ -12,7 +15,7 @@ movieRouter.get('/latest', (req: Request, res: Response) => {
     movieService.getAll(30).then(movies => res.json(movies));
 });
 
-movieRouter.get('/:id', (req: Request, res: Response) => {
+movieRouter.get('/:id', jwt({ secret: configuration.jwt.secret, credentialsRequired: false }), (req: Request, res: Response) => {
     if (req.params.id && req.params.id > 0) {
         movieService.getById(req.params.id).then(movie => res.json(movie));
     } else {
@@ -26,26 +29,62 @@ movieRouter.get('/:id', (req: Request, res: Response) => {
             query += ' AND movie.id NOT IN :idFilter';
         }
 
-        return connection.createQueryBuilder(Movie, 'movie').select('COUNT(*)', 'count')
-            .where(query, { idFilter })
-            .getRawOne().then((result: { count: number }) => {
-                connection.createQueryBuilder(Movie, 'movie')
-                    .where(query, { idFilter })
-                    .offset(rand(0, result.count) - 1)
-                    .orderBy('movie.id', 'ASC')
-                    .limit(1)
-                    .getOne().then((movieId: { id: number }) => {
-                        movieService.getById(movieId.id).then(movie => {
-                            if (!req.session.playedMovies) {
-                                req.session.playedMovies = [];
-                            }
-                            req.session.playedMovies.push(movie.id);
-                            res.json(movie);
-                        });
-                    });
-            });
+        if (req.user) {
+            connection.createQueryBuilder(Playlist, 'playlist').select().where('playlist.current = 1')
+                .leftJoinAndSelect('playlist.forbiddenTags', 'forbiddenTags')
+                .leftJoinAndSelect('playlist.mandatoryTags', 'mandatoryTags')
+                .leftJoinAndSelect('playlist.allowedTags', 'allowedTags').getOne().then(playlist => {
+                    if (playlist) {
+                        if (playlist.forbiddenTags && playlist.forbiddenTags.length > 0) {
+                            const tags = [];
+                            playlist.forbiddenTags.forEach(tag => {
+                                tags.push(tag.id);
+                            });
+                            query += ' AND movie.id NOT IN (SELECT movieId FROM movie_tag WHERE tagId IN (' + tags.join(',') + '))';
+                        }
+                        if (playlist.allowedTags && playlist.allowedTags.length > 0) {
+                            const tags = [];
+                            playlist.forbiddenTags.forEach(tag => {
+                                tags.push(tag.id);
+                            });
+                            query += ' AND id IN (SELECT movieId FROM movie_tag WHERE tagId IN (' + tags.join(',') + '))';
+                        }
+                        if (playlist.mandatoryTags && playlist.mandatoryTags.length > 0) {
+                            playlist.mandatoryTags.forEach(tag => {
+                                query += ' AND EXISTS (SELECT * FROM movie_tag WHERE tagId = ' + tag.id + ' AND movieId = movie.id)';
+                            });
+                        }
+                    }
+
+                    getMovie(query, idFilter, req, res);
+                });
+        } else {
+            getMovie(query, idFilter, req, res);
+        }
+
+
     }
 });
+
+function getMovie(query: String, idFilter: number[], req: Request, res: Response) {
+    connection.createQueryBuilder(Movie, 'movie').select('COUNT(*)', 'count')
+        .where(query, { idFilter })
+        .getRawOne().then((result: { count: number }) => connection.createQueryBuilder(Movie, 'movie')
+            .where(query, { idFilter })
+            .offset(rand(0, result.count) - 1)
+            .orderBy('movie.id', 'ASC')
+            .limit(1)
+            .getOne().then((movieId: { id: number }) =>
+                movieService.getById(movieId.id).then(movie => {
+                    if (!req.session.playedMovies) {
+                        req.session.playedMovies = [];
+                    }
+                    req.session.playedMovies.push(movie.id);
+                    res.json(movie);
+                })
+            )
+        );
+}
 
 function rand(min = 0, max = 0x7FFFFFFF): number {
     const diff = max - min;
