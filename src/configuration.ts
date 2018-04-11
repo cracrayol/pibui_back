@@ -9,7 +9,7 @@ export const configuration = {
         saltRounds: 12
     },
     session: {
-        maxAge: 3600
+        maxAge: 86400
     },
     sessionStore: {
         host: 'localhost',

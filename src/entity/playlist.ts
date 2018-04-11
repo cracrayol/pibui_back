@@ -23,15 +23,15 @@ export class Playlist extends BaseEntity {
     user: User;
 
     @ManyToMany(type => Tag)
-    @JoinTable({ name : 'playlist_f_tag'})
+    @JoinTable({ name: 'playlist_f_tag' })
     forbiddenTags: Tag[];
 
     @ManyToMany(type => Tag)
-    @JoinTable({ name : 'playlist_a_tag'})
+    @JoinTable({ name: 'playlist_a_tag' })
     allowedTags: Tag[];
 
     @ManyToMany(type => Tag)
-    @JoinTable({ name : 'playlist_m_tag'})
+    @JoinTable({ name: 'playlist_m_tag' })
     mandatoryTags: Tag[];
 
     @CreateDateColumn()

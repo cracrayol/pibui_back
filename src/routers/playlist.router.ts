@@ -3,7 +3,6 @@ import { PlaylistService } from '../services/playlist.service';
 import { IncomingHttpHeaders } from 'http';
 import * as jwt from 'express-jwt';
 import { configuration } from '../configuration';
-import { matchedData } from 'express-validator/filter';
 import { Playlist } from '../entity/playlist';
 import { connection } from '..';
 
@@ -45,6 +44,16 @@ playlistRouter.post('/', jwt({ secret: configuration.jwt.secret, credentialsRequ
         playlist.name = playlistRequest.name;
         playlist.user = req.user;
         playlist.save().then(_ => res.json(playlist));
+    } else {
+        res.json([]);
+    }
+});
+
+playlistRouter.delete('/:id', jwt({ secret: configuration.jwt.secret, credentialsRequired: false }), (req: Request, res: Response) => {
+    if (req.user) {
+        playlistService.getById(req.params.id).then(playlist => {
+            playlist.remove().then(_ => res.json([]));
+        });
     } else {
         res.json([]);
     }
