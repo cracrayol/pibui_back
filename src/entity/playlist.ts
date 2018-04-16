@@ -14,9 +14,6 @@ export class Playlist extends BaseEntity {
     name: string;
 
     @Column()
-    current: boolean;
-
-    @Column()
     public: boolean;
 
     @ManyToOne(type => User, user => user.playlists)

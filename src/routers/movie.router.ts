@@ -6,10 +6,13 @@ import { connection } from '../index';
 import { Movie } from '../entity/movie';
 import { Playlist } from '../entity/playlist';
 import { configuration } from '../configuration';
+import { User } from '../entity/user';
+import { UserService } from '../services/user.service';
 
 export const movieRouter = Router();
 
 const movieService = new MovieService();
+const userService = new UserService();
 
 movieRouter.get('/latest', (req: Request, res: Response) => {
     movieService.getAll(30).then(movies => res.json(movies));
@@ -29,35 +32,39 @@ movieRouter.get('/:id', jwt({ secret: configuration.jwt.secret, credentialsRequi
             query += ' AND movie.id NOT IN :idFilter';
         }
 
+        console.log(req.user);
         if (req.user) {
-            connection.createQueryBuilder(Playlist, 'playlist').select().where('playlist.current = 1')
-                .leftJoinAndSelect('playlist.forbiddenTags', 'forbiddenTags')
-                .leftJoinAndSelect('playlist.mandatoryTags', 'mandatoryTags')
-                .leftJoinAndSelect('playlist.allowedTags', 'allowedTags').getOne().then(playlist => {
-                    if (playlist) {
-                        if (playlist.forbiddenTags && playlist.forbiddenTags.length > 0) {
-                            const tags = [];
-                            playlist.forbiddenTags.forEach(tag => {
-                                tags.push(tag.id);
-                            });
-                            query += ' AND movie.id NOT IN (SELECT movieId FROM movie_tag WHERE tagId IN (' + tags.join(',') + '))';
+            userService.getById(req.user.id).then(user => {
+                connection.createQueryBuilder(Playlist, 'playlist').select()
+                    .where('playlist.id = ' + user.currentPlaylistId)
+                    .leftJoinAndSelect('playlist.forbiddenTags', 'forbiddenTags')
+                    .leftJoinAndSelect('playlist.mandatoryTags', 'mandatoryTags')
+                    .leftJoinAndSelect('playlist.allowedTags', 'allowedTags').getOne().then(playlist => {
+                        if (playlist) {
+                            if (playlist.forbiddenTags && playlist.forbiddenTags.length > 0) {
+                                const tags = [];
+                                playlist.forbiddenTags.forEach(tag => {
+                                    tags.push(tag.id);
+                                });
+                                query += ' AND movie.id NOT IN (SELECT movieId FROM movie_tag WHERE tagId IN (' + tags.join(',') + '))';
+                            }
+                            if (playlist.allowedTags && playlist.allowedTags.length > 0) {
+                                const tags = [];
+                                playlist.forbiddenTags.forEach(tag => {
+                                    tags.push(tag.id);
+                                });
+                                query += ' AND id IN (SELECT movieId FROM movie_tag WHERE tagId IN (' + tags.join(',') + '))';
+                            }
+                            if (playlist.mandatoryTags && playlist.mandatoryTags.length > 0) {
+                                playlist.mandatoryTags.forEach(tag => {
+                                    query += ' AND EXISTS (SELECT * FROM movie_tag WHERE tagId = ' + tag.id + ' AND movieId = movie.id)';
+                                });
+                            }
                         }
-                        if (playlist.allowedTags && playlist.allowedTags.length > 0) {
-                            const tags = [];
-                            playlist.forbiddenTags.forEach(tag => {
-                                tags.push(tag.id);
-                            });
-                            query += ' AND id IN (SELECT movieId FROM movie_tag WHERE tagId IN (' + tags.join(',') + '))';
-                        }
-                        if (playlist.mandatoryTags && playlist.mandatoryTags.length > 0) {
-                            playlist.mandatoryTags.forEach(tag => {
-                                query += ' AND EXISTS (SELECT * FROM movie_tag WHERE tagId = ' + tag.id + ' AND movieId = movie.id)';
-                            });
-                        }
-                    }
 
-                    getMovie(query, idFilter, req, res);
-                });
+                        getMovie(query, idFilter, req, res);
+                    });
+            });
         } else {
             getMovie(query, idFilter, req, res);
         }

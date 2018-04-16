@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, CreateDateColumn, UpdateDateColumn, BaseEntity } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, CreateDateColumn, UpdateDateColumn, BaseEntity, ManyToOne } from 'typeorm';
 import { Playlist } from './playlist';
 
 @Entity()
@@ -21,4 +21,7 @@ export class User extends BaseEntity {
 
     @UpdateDateColumn()
     updatedAt: string;
+
+    @Column()
+    currentPlaylistId: number;
 }

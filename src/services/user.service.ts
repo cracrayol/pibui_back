@@ -20,11 +20,10 @@ export class UserService {
         return connection.createQueryBuilder(User, 'user')
             .where('user.email = :email', { email })
             .getOne().then(u => {
-                const { id, email } = u!;
                 return {
-                    token: jwt.sign({ id, email }, configuration.jwt.secret, { expiresIn: configuration.session.maxAge }),
+                    token: jwt.sign({ id: u.id, email }, configuration.jwt.secret, { expiresIn: configuration.session.maxAge }),
                     expiresIn: configuration.session.maxAge,
-                    user: { id, email }
+                    user: { id: u.id, email, currentPlaylistId: u.currentPlaylistId }
                 };
             });
     }
