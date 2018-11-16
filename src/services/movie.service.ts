@@ -1,4 +1,4 @@
-import { connection } from '../index';
+import { connection } from '../app';
 import { Movie } from '../entity/movie';
 
 export class MovieService {

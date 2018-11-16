@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import { MovieService } from '../services/movie.service';
 import { randomBytes } from 'crypto';
 import * as jwt from 'express-jwt';
-import { connection } from '../index';
+import { connection } from '../app';
 import { Movie } from '../entity/movie';
 import { Playlist } from '../entity/playlist';
 import { configuration } from '../configuration';

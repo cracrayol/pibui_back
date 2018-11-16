@@ -4,7 +4,7 @@ import { IncomingHttpHeaders } from 'http';
 import * as jwt from 'express-jwt';
 import { configuration } from '../configuration';
 import { Playlist } from '../entity/playlist';
-import { connection } from '..';
+import { connection } from '../app';
 
 export const playlistRouter = Router();
 

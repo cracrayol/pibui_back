@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { connection } from '../index';
+import { connection } from '../app';
 import { Movie } from '../entity/movie';
 import { Author } from '../entity/author';
 

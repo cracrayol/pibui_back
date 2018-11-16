@@ -1,4 +1,4 @@
-import { connection } from '../index';
+import { connection } from '../app';
 import { Playlist } from '../entity/playlist';
 
 export class PlaylistService {

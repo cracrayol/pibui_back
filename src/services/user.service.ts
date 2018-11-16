@@ -1,6 +1,6 @@
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
-import { connection } from '../index';
+import { connection } from '../app';
 import { User } from '../entity/user';
 import { configuration } from '../configuration';
 import { Playlist } from '../entity/playlist';
