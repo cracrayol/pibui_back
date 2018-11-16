@@ -14,7 +14,7 @@
     "author": "cracrayol",
     "license": "ISC",
     "dependencies": {
-        "bcrypt": "^3.0.2",
+        "bcryptjs": "^2.4.3",
         "body-parser": "^1.18.3",
         "cookie-parser": "^1.4.3",
         "cors": "^2.8.5",
@@ -29,7 +29,7 @@
         "typeorm": "^0.2.8"
     },
     "devDependencies": {
-        "@types/bcrypt": "^2.0.0",
+        "@types/bcryptjs": "^2.4.2",
         "@types/body-parser": "^1.17.0",
         "@types/cookie-parser": "^1.4.1",
         "@types/cors": "^2.8.4",

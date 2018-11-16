@@ -1,4 +1,4 @@
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { check } from 'express-validator/check';
 import { UserService } from '../services/user.service';
 
