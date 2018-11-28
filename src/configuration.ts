@@ -22,6 +22,9 @@ export const configuration = {
         origin: 'http://127.0.0.1:4200',
         credentials: true
     },
+    youtube: {
+        apiKey: '<Your_Youtube_API_Key>'
+    },
     typeOrm: <ConnectionOptions>{
         type: 'mysql',
         host: 'localhost',
