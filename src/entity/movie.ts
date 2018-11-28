@@ -11,19 +11,19 @@ export class Movie extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
+    @Column({ length: 500 })
     title: string;
 
-    @Column()
+    @Column({ length: 500 })
     subtitle: string;
 
-    @Column()
+    @Column({ length: 50 })
     linkType: string;
 
-    @Column()
+    @Column({ length: 50 })
     linkId: string;
 
-    @Column()
+    @Column({ type: 'tinyint' })
     errorCount: number;
 
     @Column()

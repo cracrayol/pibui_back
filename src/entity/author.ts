@@ -7,10 +7,10 @@ export class Author extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
+    @Column({ length: 250 })
     name: string;
 
-    @Column()
+    @Column({ length: 250 })
     subname: string;
 
     @OneToMany(type => Movie, movie => movie.author)

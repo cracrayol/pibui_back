@@ -6,7 +6,7 @@ export class Tag extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
+    @Column({ length: 100 })
     name: string;
 
     @Column()
