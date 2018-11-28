@@ -43,6 +43,8 @@ export class MovieService {
                     } else {
                         resolve();
                     }
+                }).catch(error => {
+                    reject();
                 });
             } else {
                 reject();
