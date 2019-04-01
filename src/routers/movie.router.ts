@@ -45,6 +45,10 @@ movieRouter.get('/:id', jwt({ secret: configuration.jwt.secret, credentialsRequi
     }
 });
 
+/**
+ * Return a random movie based on parameters in the requesr
+ * @param req The request
+ */
 function getRandomMovie(req: Request) {
     return new Promise(function (resolve) {
         let query = 'movie.valid = 1 AND movie.hidden = false AND movie.errorCount < 5';
@@ -94,6 +98,12 @@ function getRandomMovie(req: Request) {
     });
 }
 
+/**
+ * Return a movie based on the given query and update session
+ * @param query The query to execute
+ * @param idFilter Content of the idFilter query parameter
+ * @param session The session
+ */
 function getMovie(query: String, idFilter: number[], session) {
     return new Promise(function (resolve) {
         connection.createQueryBuilder(Movie, 'movie').select('COUNT(*)', 'count')
@@ -123,6 +133,11 @@ function getMovie(query: String, idFilter: number[], session) {
     });
 }
 
+/**
+ * Return a random integer between min and max
+ * @param min The possbile min value
+ * @param max The possbile max value
+ */
 function rand(min = 0, max = 0x7FFFFFFF): number {
     const diff = max - min;
     const bytes = randomBytes(4).readInt32LE(0);

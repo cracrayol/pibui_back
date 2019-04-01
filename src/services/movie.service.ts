@@ -10,6 +10,11 @@ const youtube = google.youtube({
 
 export class MovieService {
 
+    /**
+     * Return all the movies, ordered by validation date
+     * @param limit Limit the number of results
+     * @returns A promise
+     */
     getAll(limit?: number) {
         return connection.createQueryBuilder(Movie, 'movie')
             .where('movie.valid = 1 AND movie.hidden = 0 AND movie.errorCount < 5')
@@ -20,6 +25,11 @@ export class MovieService {
             .getMany();
     }
 
+    /**
+     * Get a movie from his internal ID.
+     * @param id Movie's id
+     * @returns A promise
+     */
     getById(id: number) {
         return connection.createQueryBuilder(Movie, 'movie')
             .where('movie.valid = 1 AND movie.hidden = 0 AND movie.errorCount < 5 AND movie.id = :id', { id })
@@ -28,6 +38,11 @@ export class MovieService {
             .getOne();
     }
 
+    /**
+     * Check the given movie.
+     * @param movie Movie to check
+     * @returns A promise that is resolved if check is OK, else is rejected
+     */
     checkVideoState(movie: Movie) {
         return new Promise(function (resolve, reject) {
             if (movie.linkType === 'youtube') {

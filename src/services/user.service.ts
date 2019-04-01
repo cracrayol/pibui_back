@@ -6,6 +6,11 @@ import { configuration } from '../configuration';
 import { Playlist } from '../entity/playlist';
 
 export class UserService {
+    /**
+     * Create a user account.
+     * @param user User object with the email and the password (will be hashed)
+     * @returns A promise
+     */
     register({ email, password }: User) {
         return bcrypt.hash(password, configuration.jwt.saltRounds)
             .then(hash => {
@@ -16,6 +21,11 @@ export class UserService {
             });
     }
 
+    /**
+     * create the JWT token for the given user.
+     * @param user A user object
+     * @returns A promise
+     */
     login({ email }: User) {
         return connection.createQueryBuilder(User, 'user')
             .where('user.email = :email', { email })
@@ -28,12 +38,22 @@ export class UserService {
             });
     }
 
+    /**
+     * Get a user from his internal ID.
+     * @param id User's ID
+     * @returns A promise
+     */
     getById(id: number) {
         return connection.createQueryBuilder(User, 'user')
             .where('user.id = :id', { id })
             .getOne();
     }
 
+    /**
+     * Get a user from his email.
+     * @param email User's email
+     * @returns A promise
+     */
     getByEmail(email: string) {
         return connection.createQueryBuilder(User, 'user')
             .where('user.email = :email', { email })
