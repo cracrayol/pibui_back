@@ -1,15 +1,16 @@
 import { ConnectionOptions } from 'typeorm';
 
 export const configuration = {
-    express: {
+    server: {
         'listenPort': 4300
     },
     jwt: {
-        secret: '0.rfyj3n9nzh',
+        secret: '<your secret key>',
         saltRounds: 12
     },
     session: {
-        maxAge: 86400
+        maxAge: 86400,
+        secret: '<a secret with minimum length of 32 characters>'
     },
     sessionStore: {
         host: 'localhost',

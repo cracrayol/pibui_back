@@ -1,10 +1,13 @@
 import 'reflect-metadata';
 
-import * as express from 'express';
-import * as cors from 'cors';
-import * as bodyParser from 'body-parser';
-import * as session from 'express-session';
 import * as MySQLStore from 'express-mysql-session';
+import * as fastify from 'fastify';
+import * as cookie from 'fastify-cookie';
+import * as session from 'fastify-session';
+import * as fastifyStatic from 'fastify-static';
+import * as cors from 'fastify-cors';
+import * as jwt from 'fastify-jwt';
+import * as path from 'path';
 
 import { configuration } from './configuration';
 import { userRouter } from './routers/user.router';
@@ -18,30 +21,51 @@ export let connection: Connection;
 createConnection(configuration.typeOrm).then(conn => {
     connection = conn;
 
-    const app = express();
+    const app = fastify({});
 
-    app.use(express.static('public'));
-    app.use(session({
-        secret: 'keyboard cat',
+    /**
+     * Plugins
+     */
+
+    app.register(fastifyStatic, {
+        root: path.join(__dirname, 'static')
+    });
+    app.register(cookie);
+    app.register(session, {
+        secret: configuration.session.secret,
         store: new MySQLStore(configuration.sessionStore),
-        resave: false, // we support the touch method so per the express-session docs this should be set to false
-        proxy: true,
         saveUninitialized: false,
         cookie: {
             maxAge: configuration.session.maxAge * 1000
         }
-    }));
-
-    app.use(bodyParser.json());
-    app.use(bodyParser.urlencoded({ extended: true }));
-    app.use(cors(configuration.cors));
-
-    app.use('/movie', movieRouter);
-    app.use('/search', searchRouter);
-    app.use('/playlist', playlistRouter);
-    app.use('/', userRouter);
-
-    app.listen(configuration.express.listenPort, () => {
-        console.log(`App is listening on port ${configuration.express.listenPort}`);
     });
+    app.register(jwt, configuration.jwt);
+    app.register(cors, configuration.cors);
+
+    /**
+     * Routes
+     */
+
+    app.register(movieRouter, { prefix: '/movie'});
+    app.register(searchRouter, { prefix: '/search'});
+    app.register(playlistRouter, { prefix: '/playlist'});
+    app.register(userRouter);
+
+    /**
+     * Hooks
+     */
+
+    app.addHook('onRequest', async (request, reply) => {
+        try {
+          await request.jwtVerify();
+        } catch (err) {
+        }
+      });
+
+    try {
+        app.listen(configuration.server.listenPort, '::');
+    } catch (err) {
+        app.log.error(err);
+        process.exit(1);
+    }
 });

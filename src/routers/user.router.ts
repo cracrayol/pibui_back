@@ -1,56 +1,91 @@
-import { Router, Request, Response } from 'express';
-import { matchedData } from 'express-validator/filter';
-import { validationResult } from 'express-validator/check';
-import { userRules } from '../rules/user.rules';
 import { UserService } from '../services/user.service';
 import { User } from '../entity/user';
-import { configuration } from '../configuration';
-import * as jwt from 'express-jwt';
+import { FastifyInstance } from 'fastify';
+import * as bcrypt from 'bcryptjs';
 
-export const userRouter = Router();
+async function routes(fastify: FastifyInstance, options) {
 
-const userService = new UserService();
+    const userService = new UserService();
 
-userRouter.post('/register', userRules['forRegister'], (req: Request, res: Response) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(422).json(errors.array());
-    }
-    const payload = matchedData(req) as User;
-    const user = userService.register(payload);
-    return user.then(u => res.json(u));
-});
+    fastify.post('/register', {
+        schema: {
+            body: {
+                type: 'object',
+                required: [
+                    'email',
+                    'password'
+                  ],
+                properties: {
+                    email: {
+                        type: 'string',
+                        format: 'email'
+                    },
+                    password: {
+                        type: 'string',
+                        minLength: 8
+                    }
+                }
+            }
+        }
+    }, async (req, res) => {
+        return userService.register(req.body);
+    });
 
-userRouter.post('/login', userRules['forLogin'], (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(422).json(errors.array());
-    }
-    const payload = matchedData(req) as User;
-    return userService.login(payload).then(t => res.json(t));
-});
+    fastify.post('/login', {
+        schema: {
+            body: {
+                type: 'object',
+                required: [
+                    'email',
+                    'password'
+                  ],
+                properties: {
+                    email: {
+                        type: 'string',
+                        format: 'email'
+                    },
+                    password: {
+                        type: 'string',
+                        minLength: 8
+                    }
+                }
+            }
+        }
+    }, async (req, res) => {
+            const user = await userService.getByEmail(req.body.email);
+            if (user !== undefined) {
+                const valid = await bcrypt.compare(req.body.password, user.password);
+                if (valid) {
+                    return userService.login(req.body);
+                }
+            }
+            res.status(422).send({'statusCode': 422, 'error': 'Bad Request', 'message': 'invalid email or password'});
+    });
 
-userRouter.get('/user/:id', jwt({ secret: configuration.jwt.secret, credentialsRequired: false }), (req: Request, res: Response) => {
-    if (req.user && parseInt(req.user.id, 10) === parseInt(req.params.id, 10)) {
-        userService.getById(req.user.id).then(user => {
-            res.json(user);
-        });
-    } else {
-        res.json([]);
-    }
-});
+    fastify.get('/user/:id', (req, res) => {
+        if (req.user && parseInt(req.user.id, 10) === parseInt(req.params.id, 10)) {
+            userService.getById(req.user.id).then(user => {
+                res.send(user);
+            });
+        } else {
+            res.send([]);
+        }
+    });
 
-userRouter.put('/user/:id', jwt({ secret: configuration.jwt.secret, credentialsRequired: false }), (req: Request, res: Response) => {
-    if (req.user && parseInt(req.user.id, 10) === parseInt(req.params.id, 10)) {
-        userService.getById(req.user.id).then(user => {
-            console.log(user);
-            const userRequest = <User>req.body;
+    fastify.put('/user/:id', (req, res) => {
+        if (req.user && parseInt(req.user.id, 10) === parseInt(req.params.id, 10)) {
+            userService.getById(req.user.id).then(user => {
+                console.log(user);
+                const userRequest = <User>req.body;
 
-            user.currentPlaylistId = userRequest.currentPlaylistId;
+                user.currentPlaylistId = userRequest.currentPlaylistId;
 
-            user.save().then(_ => res.json(user));
-        });
-    } else {
-        res.json([]);
-    }
-});
+                user.save().then(_ => res.send(user));
+            });
+        } else {
+            res.send([]);
+        }
+    });
+}
+
+export const userRouter = routes;
