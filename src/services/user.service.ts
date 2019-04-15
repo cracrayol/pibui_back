@@ -11,14 +11,13 @@ export class UserService {
      * @param user User object with the email and the password (will be hashed)
      * @returns A promise
      */
-    register({ email, password }: User) {
-        return bcrypt.hash(password, configuration.jwt.saltRounds)
-            .then(hash => {
-                const user = new User();
-                user.email = email;
-                user.password = hash;
-                return user.save();
-            });
+    async register({ email, password }: User) {
+        const hash = await bcrypt.hash(password, configuration.jwt.saltRounds);
+
+        const user = new User();
+        user.email = email;
+        user.password = hash;
+        return user.save();
     }
 
     /**
@@ -26,16 +25,15 @@ export class UserService {
      * @param user A user object
      * @returns A promise
      */
-    login({ email }: User) {
-        return connection.createQueryBuilder(User, 'user')
+    async login({ email }: User) {
+        const u = await connection.createQueryBuilder(User, 'user')
             .where('user.email = :email', { email })
-            .getOne().then(u => {
-                return {
-                    token: jwt.sign({ id: u.id, email }, configuration.jwt.secret, { expiresIn: configuration.session.maxAge }),
-                    expiresIn: configuration.session.maxAge,
-                    user: { id: u.id, email, currentPlaylistId: u.currentPlaylistId }
-                };
-            });
+            .getOne();
+        return {
+            token: jwt.sign({ id: u.id, email }, configuration.jwt.secret, { expiresIn: configuration.session.maxAge }),
+            expiresIn: configuration.session.maxAge,
+            user: { id: u.id, email, currentPlaylistId: u.currentPlaylistId }
+        };
     }
 
     /**

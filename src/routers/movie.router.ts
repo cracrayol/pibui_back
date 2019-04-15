@@ -48,53 +48,46 @@ async function routes(fastify: FastifyInstance, options) {
      * Return a random movie based on parameters in the request
      * @param req The request
      */
-    function getRandomMovie(req) {
-        return new Promise(function (resolve) {
-            let query = 'movie.valid = 1 AND movie.hidden = false AND movie.errorCount < 5';
+    async function getRandomMovie(req) {
+        let query = 'movie.valid = 1 AND movie.hidden = false AND movie.errorCount < 5';
 
-            // Filter movies to exclude already viewed movies
-            const idFilter = [];
-            if (req.session.playedMovies) {
-                idFilter.push(req.session.playedMovies);
-            }
-            if (idFilter.length > 0) {
-                query += ' AND movie.id NOT IN :idFilter';
-            }
+        // Filter movies to exclude already viewed movies
+        const idFilter = [];
+        if (req.session.playedMovies) {
+            idFilter.push(req.session.playedMovies);
+        }
+        if (idFilter.length > 0) {
+            query += ' AND movie.id NOT IN :idFilter';
+        }
 
-            if (req.user) {
-                // If user connected, search based on the selected playlist
-                userService.getById(req.user.id).then(user => {
-                    playlistService.getById(user.currentPlaylistId).then(playlist => {
-                        if (playlist) {
-                            // If user has a playlist selected, complete the query
-                            if (playlist.forbiddenTags && playlist.forbiddenTags.length > 0) {
-                                const tags = [];
-                                playlist.forbiddenTags.forEach(tag => {
-                                    tags.push(tag.id);
-                                });
-                                query += ' AND movie.id NOT IN (SELECT movieId FROM movie_tag WHERE tagId IN (' + tags.join(',') + '))';
-                            }
-                            if (playlist.allowedTags && playlist.allowedTags.length > 0) {
-                                const tags = [];
-                                playlist.forbiddenTags.forEach(tag => {
-                                    tags.push(tag.id);
-                                });
-                                query += ' AND id IN (SELECT movieId FROM movie_tag WHERE tagId IN (' + tags.join(',') + '))';
-                            }
-                            if (playlist.mandatoryTags && playlist.mandatoryTags.length > 0) {
-                                playlist.mandatoryTags.forEach(tag => {
-                                    query += ' AND EXISTS (SELECT * FROM movie_tag WHERE tagId = ' + tag.id + ' AND movieId = movie.id)';
-                                });
-                            }
-                        }
-
-                        getMovie(query, idFilter, req.session).then(movie => resolve(movie));
+        if (req.user) {
+            // If user connected, search based on the selected playlist
+            const user = await userService.getById(req.user.id);
+            const playlist = await playlistService.getById(user.currentPlaylistId);
+            if (playlist) {
+                // If user has a playlist selected, complete the query
+                if (playlist.forbiddenTags && playlist.forbiddenTags.length > 0) {
+                    const tags = [];
+                    playlist.forbiddenTags.forEach(tag => {
+                        tags.push(tag.id);
                     });
-                });
-            } else {
-                getMovie(query, idFilter, req.session).then(movie => resolve(movie));
+                    query += ' AND movie.id NOT IN (SELECT movieId FROM movie_tag WHERE tagId IN (' + tags.join(',') + '))';
+                }
+                if (playlist.allowedTags && playlist.allowedTags.length > 0) {
+                    const tags = [];
+                    playlist.forbiddenTags.forEach(tag => {
+                        tags.push(tag.id);
+                    });
+                    query += ' AND id IN (SELECT movieId FROM movie_tag WHERE tagId IN (' + tags.join(',') + '))';
+                }
+                if (playlist.mandatoryTags && playlist.mandatoryTags.length > 0) {
+                    playlist.mandatoryTags.forEach(tag => {
+                        query += ' AND EXISTS (SELECT * FROM movie_tag WHERE tagId = ' + tag.id + ' AND movieId = movie.id)';
+                    });
+                }
             }
-        });
+        }
+        return await getMovie(query, idFilter, req.session);
     }
 
     /**
@@ -103,33 +96,30 @@ async function routes(fastify: FastifyInstance, options) {
      * @param idFilter Content of the idFilter query parameter
      * @param session The session
      */
-    function getMovie(query: String, idFilter: number[], session) {
-        return new Promise(function (resolve) {
-            connection.createQueryBuilder(Movie, 'movie').select('COUNT(*)', 'count')
+    async function getMovie(query: String, idFilter: number[], session) {
+        const result = await connection.createQueryBuilder(Movie, 'movie').select('COUNT(*)', 'count')
+            .where(query, { idFilter })
+            .getRawOne();
+        const movieId = await connection.createQueryBuilder(Movie, 'movie')
                 .where(query, { idFilter })
-                .getRawOne().then((result: { count: number }) => connection.createQueryBuilder(Movie, 'movie')
-                    .where(query, { idFilter })
-                    .offset(rand(0, result.count) - 1)
-                    .orderBy('movie.id', 'ASC')
-                    .limit(1)
-                    .getOne().then((movieId: { id: number }) =>
-                        movieService.getById(movieId.id).then(movie => {
-                            movieService.checkVideoState(movie).then(_ => {
-                                if (!session.playedMovies) {
-                                    session.playedMovies = [];
-                                }
-                                session.playedMovies.push(movie.id);
-                                resolve(movie);
-                            }).catch(_ => {
-                                movie.errorCount++;
-                                movie.save();
+                .offset(rand(0, result.count) - 1)
+                .orderBy('movie.id', 'ASC')
+                .limit(1)
+                .getOne();
+        const movie = await movieService.getById(movieId.id);
+        try {
+            await movieService.checkVideoState(movie);
+            if (!session.playedMovies) {
+                session.playedMovies = [];
+            }
+            session.playedMovies.push(movie.id);
+            return movie;
+        } catch (exception) {
+            movie.errorCount++;
+            movie.save();
 
-                                getMovie(query, idFilter, session).then(newMovie => resolve(newMovie));
-                            });
-                        })
-                    )
-                );
-        });
+            return await getMovie(query, idFilter, session);
+        }
     }
 
     /**

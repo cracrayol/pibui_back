@@ -62,11 +62,10 @@ async function routes(fastify: FastifyInstance, options) {
             res.status(422).send({'statusCode': 422, 'error': 'Bad Request', 'message': 'invalid email or password'});
     });
 
-    fastify.get('/user/:id', (req, res) => {
+    fastify.get('/user/:id', async (req, res) => {
         if (req.user && parseInt(req.user.id, 10) === parseInt(req.params.id, 10)) {
-            userService.getById(req.user.id).then(user => {
-                res.send(user);
-            });
+            const user = await userService.getById(req.user.id)
+            res.send(user);
         } else {
             res.send([]);
         }

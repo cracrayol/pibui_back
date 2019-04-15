@@ -43,27 +43,20 @@ export class MovieService {
      * @param movie Movie to check
      * @returns A promise that is resolved if check is OK, else is rejected
      */
-    checkVideoState(movie: Movie) {
-        return new Promise(function (resolve, reject) {
-            if (movie.linkType === 'youtube') {
-                youtube.videos.list({
-                    id: movie.linkId,
-                    part: 'status'
-                }).then(youtubeMovie => {
-                    if (!youtubeMovie ||
-                        youtubeMovie.data.items.length === 0 ||
-                        !youtubeMovie.data.items[0].status.embeddable ||
-                        youtubeMovie.data.items[0].status.privacyStatus === 'private') {
-                        reject();
-                    } else {
-                        resolve();
-                    }
-                }).catch(error => {
-                    reject();
-                });
-            } else {
-                reject();
+    async checkVideoState(movie: Movie) {
+        if (movie.linkType === 'youtube') {
+            const youtubeMovie = await youtube.videos.list({
+                id: movie.linkId,
+                part: 'status'
+            });
+            if (!youtubeMovie ||
+                youtubeMovie.data.items.length === 0 ||
+                !youtubeMovie.data.items[0].status.embeddable ||
+                youtubeMovie.data.items[0].status.privacyStatus === 'private') {
+                throw new Error('Movie blocked.');
             }
-        });
+        } else {
+            throw new Error('Invalid linkType value for movie.');
+        }
     }
 }

@@ -6,49 +6,53 @@ async function routes(fastify: FastifyInstance, options) {
 
     const playlistService = new PlaylistService();
 
-    fastify.get('/', (req, res) => {
+    fastify.get('/', async (req, res) => {
         if (req.user) {
-            playlistService.getAll(req.user.id).then(playlists => res.send(playlists));
+            const playlists = await playlistService.getAll(req.user.id)
+            res.send(playlists);
         } else {
             res.send([]);
         }
     });
 
-    fastify.put('/:id', (req, res) => {
+    fastify.put('/:id', async (req, res) => {
         if (req.user) {
-            playlistService.getById(req.params.id).then(playlist => {
-                const playlistRequest = <Playlist>req.body;
-                console.log(playlistRequest);
-                playlist.name = playlistRequest.name;
-                playlist.public = playlistRequest.public;
-                playlist.allowedTags = playlistRequest.allowedTags;
-                playlist.mandatoryTags = playlistRequest.mandatoryTags;
-                playlist.forbiddenTags = playlistRequest.forbiddenTags;
-                playlist.save().then(_ => res.send(playlist));
-            });
+            const playlist = await playlistService.getById(req.params.id);
+
+            const playlistRequest = <Playlist>req.body;
+
+            playlist.name = playlistRequest.name;
+            playlist.public = playlistRequest.public;
+            playlist.allowedTags = playlistRequest.allowedTags;
+            playlist.mandatoryTags = playlistRequest.mandatoryTags;
+            playlist.forbiddenTags = playlistRequest.forbiddenTags;
+
+            await playlist.save();
+            res.send(playlist);
         } else {
             res.send([]);
         }
     });
 
-    fastify.post('/', (req, res) => {
+    fastify.post('/', async (req, res) => {
         if (req.user) {
             const playlist = new Playlist();
             const playlistRequest = <Playlist>req.body;
 
             playlist.name = playlistRequest.name;
             playlist.user = req.user;
-            playlist.save().then(_ => res.send(playlist));
+            playlist.save();
+            res.send(playlist);
         } else {
             res.send([]);
         }
     });
 
-    fastify.delete('/:id', (req, res) => {
+    fastify.delete('/:id', async (req, res) => {
         if (req.user) {
-            playlistService.getById(req.params.id).then(playlist => {
-                playlist.remove().then(_ => res.send([]));
-            });
+            const playlist = await playlistService.getById(req.params.id);
+            await playlist.remove();
+            res.send([]);
         } else {
             res.send([]);
         }

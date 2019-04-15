@@ -35,7 +35,9 @@ export class Movie extends BaseEntity {
     @Column()
     hidden: boolean;
 
-    @ManyToOne(type => User)
+    @ManyToOne(type => User, {
+        onDelete: 'SET NULL'
+    })
     user: User;
 
     @ManyToOne(type => Author, author => author.movies)
