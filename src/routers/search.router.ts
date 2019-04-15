@@ -20,12 +20,12 @@ async function routes(fastify: FastifyInstance, options) {
                     .getMany());
         });
 
-        const movieList: Set<Movie> = new Set<Movie>();
+        const movieList: Map<Number, Movie> = new Map<Number, Movie>();
         Promise.all(searchQueries).then(result => {
             result.forEach(resultQuery => {
-                resultQuery.forEach(movie => movieList.add(movie));
+                resultQuery.forEach(movie => movieList.set(movie.id, movie));
             });
-            const movies = Array.from(movieList);
+            const movies = Array.from(movieList.values());
             res.send(movies.sort((a, b) => {
                 return a.title.localeCompare(b.title);
             }));
