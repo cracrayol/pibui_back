@@ -16,7 +16,9 @@ export class Playlist extends BaseEntity {
     @Column()
     public: boolean;
 
-    @ManyToOne(type => User, user => user.playlists)
+    @ManyToOne(type => User, user => user.playlists, {
+        onDelete: 'CASCADE'
+    })
     user: User;
 
     @ManyToMany(type => Tag)

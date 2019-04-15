@@ -72,16 +72,24 @@ async function routes(fastify: FastifyInstance, options) {
         }
     });
 
-    fastify.put('/user/:id', (req, res) => {
+    fastify.put('/user/:id', async(req, res) => {
         if (req.user && parseInt(req.user.id, 10) === parseInt(req.params.id, 10)) {
-            userService.getById(req.user.id).then(user => {
-                console.log(user);
-                const userRequest = <User>req.body;
+            const user = await userService.getById(req.user.id);
 
-                user.currentPlaylistId = userRequest.currentPlaylistId;
+            const userRequest = <User>req.body;
+            user.currentPlaylistId = userRequest.currentPlaylistId;
 
-                user.save().then(_ => res.send(user));
-            });
+            await user.save();
+            res.send(user);
+        } else {
+            res.send([]);
+        }
+    });
+
+    fastify.delete('/user/:id', async (req, res) => {
+        if (req.user && parseInt(req.user.id, 10) === parseInt(req.params.id, 10)) {
+            const user = await userService.getById(req.user.id);
+            return user.remove();
         } else {
             res.send([]);
         }
