@@ -64,7 +64,7 @@ async function routes(fastify: FastifyInstance, options) {
 
     fastify.get('/user/:id', async (req, res) => {
         if (req.user && parseInt(req.user.id, 10) === parseInt(req.params.id, 10)) {
-            const user = await userService.getById(req.user.id)
+            const user = await userService.getById(req.user.id);
             res.send(user);
         } else {
             res.send([]);

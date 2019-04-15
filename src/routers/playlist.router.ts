@@ -8,7 +8,7 @@ async function routes(fastify: FastifyInstance, options) {
 
     fastify.get('/', async (req, res) => {
         if (req.user) {
-            const playlists = await playlistService.getAll(req.user.id)
+            const playlists = await playlistService.getAll(req.user.id);
             res.send(playlists);
         } else {
             res.send([]);
