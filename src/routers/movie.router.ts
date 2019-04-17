@@ -1,5 +1,4 @@
 import { FastifyInstance } from 'fastify';
-import { randomBytes } from 'crypto';
 
 import { connection } from '../app';
 
@@ -8,6 +7,7 @@ import { PlaylistService } from '../services/playlist.service';
 import { UserService } from '../services/user.service';
 
 import { Movie } from '../entity/movie';
+import { rand } from '../utils/random';
 
 async function routes(fastify: FastifyInstance, options) {
 
@@ -120,18 +120,6 @@ async function routes(fastify: FastifyInstance, options) {
 
             return await getMovie(query, idFilter, session);
         }
-    }
-
-    /**
-     * Return a random integer between min and max
-     * @param min The possbile min value
-     * @param max The possbile max value
-     */
-    function rand(min = 0, max = 0x7FFFFFFF): number {
-        const diff = max - min;
-        const bytes = randomBytes(4).readInt32LE(0);
-        const fp = (bytes & 0x7FFFFFFF) / 2147483647.0;
-        return Math.round(fp * diff) + min;
     }
 }
 
