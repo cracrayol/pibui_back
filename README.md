@@ -1,7 +1,3 @@
-# Awesome Project Build with TypeORM
+# Pibui server
         
-Steps to run this project:
-
-1. Run `npm i` command
-2. Setup database settings inside `ormconfig.json` file
-3. Run `npm start` command
+This node app manage the server side of the Pibui website (currently https://beta.pibui.org)

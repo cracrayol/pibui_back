@@ -19,7 +19,7 @@ async function routes(fastify: FastifyInstance, options) {
         return await movieService.getAll(30);
     });
 
-    fastify.get('/:id', async (req, res) => {
+    fastify.get('/:id', { preValidation: [fastify.authenticateNoError] }, async (req, res) => {
         if (req.params.id && req.params.id > 0) {
             // Get a specific movie
             const movie = await movieService.getById(req.params.id);

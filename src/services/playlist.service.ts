@@ -23,12 +23,17 @@ export class PlaylistService {
      * @param id Playlist's internal ID
      * @returns A promise
      */
-    getById(id: number) {
-        return connection.createQueryBuilder(Playlist, 'playlist')
+    getById(id: number, withUser = false) {
+        let query = connection.createQueryBuilder(Playlist, 'playlist')
             .where('playlist.id = :id', { id })
             .leftJoinAndSelect('playlist.forbiddenTags', 'forbiddenTags')
             .leftJoinAndSelect('playlist.allowedTags', 'allowedTags')
-            .leftJoinAndSelect('playlist.mandatoryTags', 'mandatoryTags')
-            .getOne();
+            .leftJoinAndSelect('playlist.mandatoryTags', 'mandatoryTags');
+
+        if (withUser) {
+            query = query.leftJoinAndSelect('playlist.user', 'user');
+        }
+
+        return query.getOne();
     }
 }

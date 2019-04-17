@@ -6,7 +6,6 @@ import * as cookie from 'fastify-cookie';
 import * as session from 'fastify-session';
 import * as fastifyStatic from 'fastify-static';
 import * as cors from 'fastify-cors';
-import * as jwt from 'fastify-jwt';
 import * as path from 'path';
 
 import { configuration } from './configuration';
@@ -15,6 +14,7 @@ import { movieRouter } from './routers/movie.router';
 import { searchRouter } from './routers/search.router';
 import { playlistRouter } from './routers/playlist.router';
 import { createConnection, Connection } from 'typeorm';
+import { jwtPlugin } from './plugins/jwt.plugin';
 
 export let connection: Connection;
 
@@ -39,7 +39,7 @@ createConnection(configuration.typeOrm).then(conn => {
             maxAge: configuration.session.maxAge * 1000
         }
     });
-    app.register(jwt, configuration.jwt);
+    app.register(jwtPlugin);
     app.register(cors, configuration.cors);
 
     /**
@@ -50,17 +50,6 @@ createConnection(configuration.typeOrm).then(conn => {
     app.register(searchRouter, { prefix: '/search'});
     app.register(playlistRouter, { prefix: '/playlist'});
     app.register(userRouter);
-
-    /**
-     * Hooks
-     */
-
-    app.addHook('onRequest', async (request, reply) => {
-        try {
-          await request.jwtVerify();
-        } catch (err) {
-        }
-      });
 
     try {
         app.listen(configuration.server.listenPort, '::');
