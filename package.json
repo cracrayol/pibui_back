@@ -23,7 +23,7 @@
         "fastify-plugin": "^1.5.0",
         "fastify-session": "^2.0.0",
         "fastify-static": "^2.4.0",
-        "googleapis": "^35.0.0",
+        "googleapis": "^39.0.0",
         "jsonwebtoken": "^8.5.1",
         "mysql": "^2.16.0",
         "typeorm": "^0.2.16"
