@@ -12,7 +12,7 @@ declare module 'fastify' {
         Headers = DefaultHeaders,
         Body = DefaultBody
         > {
-        session: any;
+        session: Session;
         user: any;
     }
 

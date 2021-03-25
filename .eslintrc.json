@@ -7,7 +7,7 @@
       true,
       "check-space"
     ],
-    "curly": true,
+    "curly": 1,
     "eofline": true,
     "forin": true,
     "import-spacing": true,
@@ -34,7 +34,7 @@
       }
     ],
     "no-arg": true,
-    "no-bitwise": false,
+    "no-bitwise": 0,
     "no-console": [
       true,
       "debug",
@@ -44,11 +44,11 @@
       "trace"
     ],
     "no-construct": true,
-    "no-debugger": true,
+    "no-debugger": 1,
     "no-duplicate-super": true,
-    "no-empty": false,
+    "no-empty": 0,
     "no-empty-interface": true,
-    "no-eval": true,
+    "no-eval": 1,
     "no-inferrable-types": [
       true,
       "ignore-params"
@@ -72,12 +72,12 @@
       "check-else",
       "check-whitespace"
     ],
-    "prefer-const": true,
+    "prefer-const": 1,
     "quotemark": [
       true,
       "single"
     ],
-    "radix": true,
+    "radix": 1,
     "semicolon": [
       true,
       "always"
