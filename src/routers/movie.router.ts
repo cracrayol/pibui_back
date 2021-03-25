@@ -24,7 +24,7 @@ async function routes(fastify: FastifyInstance, options) {
             // Get a specific movie
             const movie = await movieService.getById(req.params.id);
             try {
-                await movieService.checkVideoState(movie);
+                //await movieService.checkVideoState(movie);
                 // movie seems OK => send it
                 if (!req.session.playedMovies) {
                     req.session.playedMovies = [];
@@ -108,7 +108,7 @@ async function routes(fastify: FastifyInstance, options) {
                 .getOne();
         const movie = await movieService.getById(movieId.id);
         try {
-            await movieService.checkVideoState(movie);
+            //await movieService.checkVideoState(movie);
             if (!session.playedMovies) {
                 session.playedMovies = [];
             }

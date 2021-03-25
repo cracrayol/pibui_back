@@ -1,12 +1,12 @@
 import { connection } from '../app';
 import { Movie } from '../entity/movie';
-import { google } from 'googleapis';
+//import { google } from 'googleapis';
 import { configuration } from '../configuration';
 
-const youtube = google.youtube({
+/*const youtube = google.youtube({
     version: 'v3',
     auth: configuration.youtube.apiKey
-});
+});*/
 
 export class MovieService {
 
@@ -43,7 +43,7 @@ export class MovieService {
      * @param movie Movie to check
      * @returns A promise that is resolved if check is OK, else is rejected
      */
-    async checkVideoState(movie: Movie) {
+    /*async checkVideoState(movie: Movie) {
         if (movie.linkType === 'youtube') {
             const youtubeMovie = await youtube.videos.list({
                 id: movie.linkId,
@@ -58,5 +58,5 @@ export class MovieService {
         } else {
             throw new Error('Invalid linkType value for movie.');
         }
-    }
+    }*/
 }
