@@ -75,7 +75,7 @@ async function routes(fastify: FastifyInstance, options) {
                 }
                 if (playlist.allowedTags && playlist.allowedTags.length > 0) {
                     const tags = [];
-                    playlist.forbiddenTags.forEach(tag => {
+                    playlist.allowedTags.forEach(tag => {
                         tags.push(tag.id);
                     });
                     query += ' AND id IN (SELECT movieId FROM movie_tag WHERE tagId IN (' + tags.join(',') + '))';
