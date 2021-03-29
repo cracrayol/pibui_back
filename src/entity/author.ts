@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, CreateDateColumn, UpdateDateColumn, BaseEntity } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, CreateDateColumn, UpdateDateColumn, BaseEntity, Index } from 'typeorm';
 import { Movie } from './movie';
 
 @Entity()
@@ -8,6 +8,7 @@ export class Author extends BaseEntity {
     id: number;
 
     @Column({ length: 250 })
+    @Index({fulltext: true})
     name: string;
 
     @Column({ length: 250 })

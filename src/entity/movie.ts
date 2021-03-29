@@ -1,5 +1,5 @@
 import {
-    Entity, Column, PrimaryGeneratedColumn, ManyToOne, ManyToMany, JoinTable, CreateDateColumn, UpdateDateColumn, BaseEntity
+    Entity, Column, PrimaryGeneratedColumn, ManyToOne, ManyToMany, JoinTable, CreateDateColumn, UpdateDateColumn, BaseEntity, Index
 } from 'typeorm';
 import { User } from './user';
 import { Tag } from './tag';
@@ -12,6 +12,7 @@ export class Movie extends BaseEntity {
     id: number;
 
     @Column({ length: 500 })
+    @Index({fulltext: true})
     title: string;
 
     @Column({ length: 500 })
