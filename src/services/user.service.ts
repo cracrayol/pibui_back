@@ -17,6 +17,7 @@ export class UserService {
         const user = new User();
         user.email = email;
         user.password = hash;
+        user.isAdmin = false;
         return user.save();
     }
 
@@ -32,7 +33,7 @@ export class UserService {
         return {
             token: jwt.sign({ id: u.id, email }, configuration.jwt.secret, { expiresIn: configuration.session.maxAge }),
             expiresIn: configuration.session.maxAge,
-            user: { id: u.id, email, currentPlaylistId: u.currentPlaylistId }
+            user: { id: u.id, email, currentPlaylistId: u.currentPlaylistId, isAdmin: u.isAdmin }
         };
     }
 

@@ -16,12 +16,15 @@ export class User extends BaseEntity {
     @OneToMany(type => Playlist, playlist => playlist.user)
     playlists: Playlist[];
 
+    @Column()
+    currentPlaylistId: number;
+
+    @Column({default: false})
+    isAdmin: boolean;
+
     @CreateDateColumn()
     createdAt: string;
 
     @UpdateDateColumn()
     updatedAt: string;
-
-    @Column()
-    currentPlaylistId: number;
 }
