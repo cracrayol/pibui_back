@@ -12,6 +12,7 @@ import { configuration } from './configuration';
 import { userRouter } from './routers/user.router';
 import { movieRouter } from './routers/movie.router';
 import { searchRouter } from './routers/search.router';
+import { authorRouter } from './routers/author.router';
 import { playlistRouter } from './routers/playlist.router';
 import { createConnection, Connection } from 'typeorm';
 import { jwtPlugin } from './plugins/jwt.plugin';
@@ -47,6 +48,7 @@ createConnection(configuration.typeOrm).then(conn => {
      */
 
     app.register(movieRouter, { prefix: '/movie'});
+    app.register(authorRouter, { prefix: '/author'});
     app.register(searchRouter, { prefix: '/search'});
     app.register(playlistRouter, { prefix: '/playlist'});
     app.register(userRouter);

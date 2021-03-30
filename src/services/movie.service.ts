@@ -1,7 +1,7 @@
 import { connection } from '../app';
 import { Movie } from '../entity/movie';
 //import { google } from 'googleapis';
-import { configuration } from '../configuration';
+//import { configuration } from '../configuration';
 
 /*const youtube = google.youtube({
     version: 'v3',
@@ -17,11 +17,11 @@ export class MovieService {
      */
     getAll(limit?: number) {
         return connection.createQueryBuilder(Movie, 'movie')
-            .where('movie.valid = 1 AND movie.hidden = 0 AND movie.errorCount < 5')
+            .where('movie.valid = 1 AND movie.errorCount < 5')
             .leftJoinAndSelect('movie.tags', 'tag')
             .leftJoinAndSelect('movie.author', 'author')
             .take(limit)
-            .orderBy('movie.validDate', 'DESC')
+            .orderBy('movie.createdAt', 'DESC')
             .getMany();
     }
 
@@ -32,7 +32,7 @@ export class MovieService {
      */
     getById(id: number) {
         return connection.createQueryBuilder(Movie, 'movie')
-            .where('movie.valid = 1 AND movie.hidden = 0 AND movie.errorCount < 5 AND movie.id = :id', { id })
+            .where('movie.valid = 1 AND movie.errorCount < 5 AND movie.id = :id', { id })
             .leftJoinAndSelect('movie.tags', 'tag')
             .leftJoinAndSelect('movie.author', 'author')
             .getOne();

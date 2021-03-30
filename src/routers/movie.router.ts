@@ -44,12 +44,38 @@ async function routes(fastify: FastifyInstance, options) {
         }
     });
 
+    fastify.put('/:id', { preValidation: [fastify.authenticate] }, async (req, res) => {
+        const movie = await movieService.getById(req.params.id);
+        const user = await userService.getById(req.user.id);
+
+        if (!movie) {
+            res.send(new Error('BAD_MOVIE_ID'));
+            return;
+        } else if (!user) {
+            res.send(new Error('BAD_USER_ID'));
+            return;
+        } else if (!user.isAdmin) {
+            res.send(new Error('NOT_ALLOWED'));
+            return;
+        }
+
+        const movieRequest = <Movie>req.body;
+
+        movie.title = movieRequest.title;
+        movie.subtitle = movieRequest.subtitle;
+        movie.linkId = movieRequest.linkId;
+        movie.valid = movieRequest.valid;
+
+        await movie.save();
+        res.send(movie);
+    });
+
     /**
      * Return a random movie based on parameters in the request
      * @param req The request
      */
     async function getRandomMovie(req) {
-        let query = 'movie.valid = 1 AND movie.hidden = false AND movie.errorCount < 5';
+        let query = 'movie.valid = 1 AND movie.errorCount < 5';
 
         // Filter movies to exclude already viewed movies
         const idFilter = [];
