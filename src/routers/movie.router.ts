@@ -65,6 +65,7 @@ async function routes(fastify: FastifyInstance, options) {
         movie.subtitle = movieRequest.subtitle;
         movie.linkId = movieRequest.linkId;
         movie.valid = movieRequest.valid;
+        movie.author = movieRequest.author;
 
         await movie.save();
         res.send(movie);
