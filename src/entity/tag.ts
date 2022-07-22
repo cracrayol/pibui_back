@@ -4,17 +4,17 @@ import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateCol
 export class Tag extends BaseEntity {
 
     @PrimaryGeneratedColumn()
-    id: number;
+    id!: number;
 
     @Column({ length: 100 })
-    name: string;
+    name!: string;
 
     @Column()
-    valid: boolean;
+    valid!: boolean;
 
     @CreateDateColumn()
-    createdAt: string;
+    createdAt!: string;
 
     @UpdateDateColumn()
-    updatedAt: string;
+    updatedAt!: string;
 }

@@ -30,6 +30,9 @@ export class UserService {
         const u = await connection.createQueryBuilder(User, 'user')
             .where('user.email = :email', { email })
             .getOne();
+        if(u === null) {
+            return null;
+        }
         return {
             token: jwt.sign({ id: u.id, email }, configuration.jwt.secret, { expiresIn: configuration.session.maxAge }),
             expiresIn: configuration.session.maxAge,

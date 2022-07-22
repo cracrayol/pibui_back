@@ -1,4 +1,5 @@
-import { ConnectionOptions } from 'typeorm';
+import type  { Options } from 'express-mysql-session';
+import type  { DataSourceOptions } from 'typeorm';
 
 export const configuration = {
     server: {
@@ -12,7 +13,7 @@ export const configuration = {
         maxAge: 86400,
         secret: '<a secret with minimum length of 32 characters>'
     },
-    sessionStore: {
+    sessionStore: <Options> {
         host: 'localhost',
         port: 3306,
         user: 'root',
@@ -26,7 +27,7 @@ export const configuration = {
     /*youtube: {
         apiKey: '<Your_Youtube_API_Key>'
     },*/
-    typeOrm: <ConnectionOptions>{
+    typeOrm: <DataSourceOptions>{
         type: 'mysql',
         host: 'localhost',
         port: 3306,

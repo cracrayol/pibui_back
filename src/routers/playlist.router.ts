@@ -1,8 +1,9 @@
 import { PlaylistService } from '../services/playlist.service';
 import { Playlist } from '../entity/playlist';
-import { FastifyInstance } from 'fastify';
+import { FastifyInstance, FastifyRequest } from 'fastify';
+import { User } from '../entity/user';
 
-async function routes(fastify: FastifyInstance, options) {
+async function routes(fastify: FastifyInstance) {
 
     const playlistService = new PlaylistService();
 
@@ -11,7 +12,7 @@ async function routes(fastify: FastifyInstance, options) {
         res.send(playlists);
     });
 
-    fastify.put('/:id', { preValidation: [fastify.authenticate] }, async (req, res) => {
+    fastify.put('/:id', { preValidation: [fastify.authenticate] }, async (req:FastifyRequest<{Params:{id:number}}>, res) => {
         const playlist = await playlistService.getById(req.params.id, true);
 
         if (!playlist) {
@@ -39,12 +40,12 @@ async function routes(fastify: FastifyInstance, options) {
         const playlistRequest = <Playlist>req.body;
 
         playlist.name = playlistRequest.name;
-        playlist.user = req.user;
+        playlist.user = <User> req.user;
         playlist.save();
         res.send(playlist);
     });
 
-    fastify.delete('/:id', { preValidation: [fastify.authenticate] }, async (req, res) => {
+    fastify.delete('/:id', { preValidation: [fastify.authenticate] }, async (req:FastifyRequest<{Params:{id:number}}>, res) => {
         const playlist = await playlistService.getById(req.params.id, true);
 
         if (!playlist) {

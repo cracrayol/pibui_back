@@ -1,15 +1,15 @@
-import { FastifyInstance } from 'fastify';
+import { FastifyInstance, FastifyRequest } from 'fastify';
 import { UserService } from '../services/user.service';
 import { AuthorService } from '../services/author.service';
 import { Author } from '../entity/author';
 import { connection } from '../app';
 
-async function routes(fastify: FastifyInstance, options) {
+async function routes(fastify: FastifyInstance) {
 
     const authorService = new AuthorService();
     const userService = new UserService();
 
-    fastify.get('/search/:name', (req, res) => {
+    fastify.get('/search/:name', (req:FastifyRequest<{Params:{name:string}}>, res) => {
         connection.createQueryBuilder(Author, 'author')
             .where('name LIKE :name',
                 { name: '%' + req.params.name + '%' })
@@ -20,7 +20,7 @@ async function routes(fastify: FastifyInstance, options) {
             });
     });
 
-    fastify.put('/:id', { preValidation: [fastify.authenticate] }, async (req, res) => {
+    fastify.put('/:id', { preValidation: [fastify.authenticate] }, async (req:FastifyRequest<{Params:{id:number}}>, res) => {
         const author = await authorService.getById(req.params.id);
         const user = await userService.getById(req.user.id);
 

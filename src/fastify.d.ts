@@ -1,24 +1,24 @@
 /**
  * Fastify module augmentation in order to add session and user object to the request object
  */
-import { DefaultQuery, DefaultParams, DefaultHeaders, DefaultBody } from "fastify";
-import { IncomingMessage, ServerResponse, Server } from "http";
+
+import fastify from "fastify";
+import { Movie } from "./entity/movie";
 
 declare module 'fastify' {
-    interface FastifyRequest<
-        HttpRequest,
-        Query = DefaultQuery,
-        Params = DefaultParams,
-        Headers = DefaultHeaders,
-        Body = DefaultBody
-        > {
-        session: Session;
-        user: any;
-    }
-
-    interface FastifyInstance<HttpServer = Server, HttpRequest = IncomingMessage, HttpResponse = ServerResponse>
-    {
+    interface FastifyInstance {
         authenticate: any;
         authenticateNoError: any;
     }
+
+    interface UserType {
+        id: number
+    }
+
+    interface Session {
+        playedMovies: number[]
+    }
+    
 }
+
+export default fastify;

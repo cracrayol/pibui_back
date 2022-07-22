@@ -5,23 +5,23 @@ import { Movie } from './movie';
 export class Author extends BaseEntity {
 
     @PrimaryGeneratedColumn()
-    id: number;
+    id!: number;
 
     @Column({ length: 250 })
-    @Index({fulltext: true})
-    name: string;
+    @Index({ fulltext: true })
+    name!: string;
 
     @Column({ length: 250 })
-    subname: string;
+    subname!: string;
 
     @OneToMany(type => Movie, movie => movie.author)
-    movies: Movie[];
+    movies!: Movie[];
 
     @CreateDateColumn()
-    createdAt: string;
+    createdAt!: string;
 
     @UpdateDateColumn()
-    updatedAt: string;
+    updatedAt!: string;
 
 }
 

@@ -1,13 +1,13 @@
-import { FastifyInstance } from 'fastify';
-import * as fp from 'fastify-plugin';
-import * as jwt from 'fastify-jwt';
+import { FastifyInstance, FastifyRegister, FastifyReply, FastifyRequest } from 'fastify';
+import fastifyPlugin from 'fastify-plugin';
+import fastifyJwt from '@fastify/jwt';
 import { configuration } from '../configuration';
 
-async function plugin(fastify: FastifyInstance, options, next) {
+async function plugin(fastify: FastifyInstance) {
 
-    fastify.register(jwt, configuration.jwt);
+    fastify.register(fastifyJwt, configuration.jwt);
 
-    fastify.decorate('authenticate', async function (request, reply) {
+    fastify.decorate('authenticate', async function (request: FastifyRequest, reply: FastifyReply) {
         try {
             await request.jwtVerify();
         } catch (err) {
@@ -15,7 +15,7 @@ async function plugin(fastify: FastifyInstance, options, next) {
         }
     });
 
-    fastify.decorate('authenticateNoError', async function (request, reply) {
+    fastify.decorate('authenticateNoError', async function (request: FastifyRequest) {
         try {
             await request.jwtVerify();
         } catch (err) {
@@ -23,4 +23,4 @@ async function plugin(fastify: FastifyInstance, options, next) {
     });
 }
 
-export const jwtPlugin = fp(plugin);
+export const jwtPlugin = fastifyPlugin(plugin);

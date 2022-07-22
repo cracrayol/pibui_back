@@ -1,4 +1,4 @@
-import { FastifyInstance } from 'fastify';
+import { FastifyInstance, FastifyReply, FastifyRequest, Session } from 'fastify';
 
 import { connection } from '../app';
 
@@ -9,7 +9,7 @@ import { UserService } from '../services/user.service';
 import { Movie } from '../entity/movie';
 import { rand } from '../utils/random';
 
-async function routes(fastify: FastifyInstance, options) {
+async function routes(fastify: FastifyInstance) {
 
     const movieService = new MovieService();
     const userService = new UserService();
@@ -19,11 +19,17 @@ async function routes(fastify: FastifyInstance, options) {
         return await movieService.getAll(30);
     });
 
-    fastify.get('/:id', { preValidation: [fastify.authenticateNoError] }, async (req, res) => {
+    fastify.get('/:id', { preValidation: [fastify.authenticateNoError] }, async (req:FastifyRequest<{Params:{id:number}}>, res) => {
         if (req.params.id && req.params.id > 0) {
             // Get a specific movie
             const movie = await movieService.getById(req.params.id);
-            try {
+
+            if (movie === null) {
+                res.send(new Error('BAD_MOVIE_ID'));
+                return;
+            }
+
+            //try {
                 //await movieService.checkVideoState(movie);
                 // movie seems OK => send it
                 if (!req.session.playedMovies) {
@@ -31,20 +37,27 @@ async function routes(fastify: FastifyInstance, options) {
                 }
                 req.session.playedMovies.push(movie.id);
                 res.send(movie);
-            } catch (e) {
+            /*} catch (e) {
                 // Increment error count and return a random movie
                 movie.errorCount++;
                 movie.save();
 
-                return await getRandomMovie(req);
-            }
+                return await getRandomMovie(req, res);
+            }*/
         } else {
             // return a random movie
-            return await getRandomMovie(req);
+            const movie = await getRandomMovie(req, res);
+
+            if (movie === null) {
+                res.send(new Error('BAD_MOVIE_ID'));
+                return;
+            }
+
+            return movie;
         }
     });
 
-    fastify.put('/:id', { preValidation: [fastify.authenticate] }, async (req, res) => {
+    fastify.put('/:id', { preValidation: [fastify.authenticate] }, async (req:FastifyRequest<{Params:{id:number}}>, res) => {
         const movie = await movieService.getById(req.params.id);
         const user = await userService.getById(req.user.id);
 
@@ -75,33 +88,40 @@ async function routes(fastify: FastifyInstance, options) {
      * Return a random movie based on parameters in the request
      * @param req The request
      */
-    async function getRandomMovie(req) {
+    async function getRandomMovie(req: FastifyRequest, res: FastifyReply) {
         let query = 'movie.valid = 1 AND movie.errorCount < 5';
 
         // Filter movies to exclude already viewed movies
-        const idFilter = [];
+        const idFilter:number[] = [];
         if (req.session.playedMovies) {
-            idFilter.push(req.session.playedMovies);
+            idFilter.concat(req.session.playedMovies);
         }
         if (idFilter.length > 0) {
+            // TODO Better management (subrequest ?)
             query += ' AND movie.id NOT IN :idFilter';
         }
 
         if (req.user) {
             // If user connected, search based on the selected playlist
             const user = await userService.getById(req.user.id);
+
+            if (user === null) {
+                res.send(new Error('BAD_USER_ID'));
+                return;
+            }
+
             const playlist = await playlistService.getById(user.currentPlaylistId);
             if (playlist) {
                 // If user has a playlist selected, complete the query
                 if (playlist.forbiddenTags && playlist.forbiddenTags.length > 0) {
-                    const tags = [];
+                    const tags: number[] = [];
                     playlist.forbiddenTags.forEach(tag => {
                         tags.push(tag.id);
                     });
                     query += ' AND movie.id NOT IN (SELECT movieId FROM movie_tag WHERE tagId IN (' + tags.join(',') + '))';
                 }
                 if (playlist.allowedTags && playlist.allowedTags.length > 0) {
-                    const tags = [];
+                    const tags: number[] = [];
                     playlist.allowedTags.forEach(tag => {
                         tags.push(tag.id);
                     });
@@ -123,7 +143,7 @@ async function routes(fastify: FastifyInstance, options) {
      * @param idFilter Content of the idFilter query parameter
      * @param session The session
      */
-    async function getMovie(query: String, idFilter: number[], session) {
+    async function getMovie(query: String, idFilter: number[], session: Session) {
         const result = await connection.createQueryBuilder(Movie, 'movie').select('COUNT(*)', 'count')
             .where(query, { idFilter })
             .getRawOne();
@@ -133,20 +153,30 @@ async function routes(fastify: FastifyInstance, options) {
                 .orderBy('movie.id', 'ASC')
                 .limit(1)
                 .getOne();
+
+        if(movieId === null) {
+            return null;
+        }
+
         const movie = await movieService.getById(movieId.id);
-        try {
+
+        if(movie === null) {
+            return null;
+        }
+
+        //try {
             //await movieService.checkVideoState(movie);
             if (!session.playedMovies) {
                 session.playedMovies = [];
             }
             session.playedMovies.push(movie.id);
             return movie;
-        } catch (exception) {
+        /*} catch (exception) {
             movie.errorCount++;
             movie.save();
 
             return await getMovie(query, idFilter, session);
-        }
+        }*/
     }
 }
 

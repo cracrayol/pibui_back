@@ -9,48 +9,48 @@ import { Author } from './author';
 export class Movie extends BaseEntity {
 
     @PrimaryGeneratedColumn()
-    id: number;
+    id!: number;
 
     @Column({ length: 500 })
-    @Index({fulltext: true})
-    title: string;
+    @Index({ fulltext: true })
+    title!: string;
 
     @Column({ length: 500 })
-    subtitle: string;
+    subtitle!: string;
 
     @Column({ length: 50 })
-    linkType: string;
+    linkType!: string;
 
     @Column({ length: 50 })
-    linkId: string;
+    linkId!: string;
 
     @Column({ type: 'tinyint' })
-    errorCount: number;
+    errorCount!: number;
 
     @Column()
-    valid: boolean;
+    valid!: boolean;
 
     @Column('datetime')
-    validDate: string;
+    validDate!: string;
 
     @Column()
-    hidden: boolean;
+    hidden!: boolean;
 
     @ManyToOne(type => User, {
         onDelete: 'SET NULL'
     })
-    user: User;
+    user!: User;
 
     @ManyToOne(type => Author, author => author.movies)
-    author: Author;
+    author!: Author;
 
     @ManyToMany(type => Tag)
     @JoinTable({ name: 'movie_tag' })
-    tags: Tag[];
+    tags!: Tag[];
 
     @CreateDateColumn()
-    createdAt: string;
+    createdAt!: string;
 
     @UpdateDateColumn()
-    updatedAt: string;
+    updatedAt!: string;
 }

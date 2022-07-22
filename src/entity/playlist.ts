@@ -8,34 +8,34 @@ import { Tag } from './tag';
 export class Playlist extends BaseEntity {
 
     @PrimaryGeneratedColumn()
-    id: number;
+    id!: number;
 
     @Column()
-    name: string;
+    name!: string;
 
     @Column()
-    public: boolean;
+    public!: boolean;
 
     @ManyToOne(type => User, user => user.playlists, {
         onDelete: 'CASCADE'
     })
-    user: User;
+    user!: User;
 
     @ManyToMany(type => Tag)
     @JoinTable({ name: 'playlist_f_tag' })
-    forbiddenTags: Tag[];
+    forbiddenTags!: Tag[];
 
     @ManyToMany(type => Tag)
     @JoinTable({ name: 'playlist_a_tag' })
-    allowedTags: Tag[];
+    allowedTags!: Tag[];
 
     @ManyToMany(type => Tag)
     @JoinTable({ name: 'playlist_m_tag' })
-    mandatoryTags: Tag[];
+    mandatoryTags!: Tag[];
 
     @CreateDateColumn()
-    createdAt: string;
+    createdAt!: string;
 
     @UpdateDateColumn()
-    updatedAt: string;
+    updatedAt!: string;
 }

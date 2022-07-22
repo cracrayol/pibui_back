@@ -1,10 +1,10 @@
 import { UserService } from '../services/user.service';
 import { User } from '../entity/user';
-import { FastifyInstance } from 'fastify';
+import { FastifyInstance, FastifyRequest } from 'fastify';
 import * as bcrypt from 'bcryptjs';
 import { configuration } from '../configuration';
 
-async function routes(fastify: FastifyInstance, options) {
+async function routes(fastify: FastifyInstance) {
 
     const userService = new UserService();
 
@@ -29,7 +29,7 @@ async function routes(fastify: FastifyInstance, options) {
             }
         }
     }, async (req, res) => {
-        return userService.register(req.body);
+        return userService.register(<User>req.body);
     });
 
     fastify.post('/login', {
@@ -53,28 +53,40 @@ async function routes(fastify: FastifyInstance, options) {
             }
         }
     }, async (req, res) => {
-        const user = await userService.getByEmail(req.body.email);
-        if (user !== undefined) {
-            const valid = await bcrypt.compare(req.body.password, user.password);
+        const reqUser = <User>req.body
+        const user = await userService.getByEmail(reqUser.email);
+        if (user !== null) {
+            const valid = await bcrypt.compare(reqUser.password, user.password);
             if (valid) {
-                return userService.login(req.body);
+                return userService.login(reqUser);
             }
         }
         res.status(422).send({ 'statusCode': 422, 'error': 'Bad Request', 'message': 'invalid email or password' });
     });
 
-    fastify.get('/user/:id', { preValidation: [fastify.authenticate] }, async (req, res) => {
-        if (req.user && parseInt(req.user.id, 10) === parseInt(req.params.id, 10)) {
+    fastify.get('/user/:id', { preValidation: [fastify.authenticate] }, async (req: FastifyRequest<{ Params: { id: number } }>, res) => {
+        if (req.user && req.user.id === req.params.id) {
             const user = await userService.getById(req.user.id);
+
+            if (user === null) {
+                res.send(new Error('UNKNOWN_USER'));
+                return;
+            }
+            
             res.send(user);
         } else {
             res.send(new Error('BAD_USER_ID'));
         }
     });
 
-    fastify.put('/user/:id', { preValidation: [fastify.authenticate] }, async (req, res) => {
-        if (req.user && parseInt(req.user.id, 10) === parseInt(req.params.id, 10)) {
+    fastify.put('/user/:id', { preValidation: [fastify.authenticate] }, async (req: FastifyRequest<{ Params: { id: number } }>, res) => {
+        if (req.user && req.user.id === req.params.id) {
             const user = await userService.getById(req.user.id);
+
+            if (user === null) {
+                res.send(new Error('UNKNOWN_USER'));
+                return;
+            }
 
             const userRequest = <User>req.body;
             user.currentPlaylistId = userRequest.currentPlaylistId;
@@ -107,9 +119,14 @@ async function routes(fastify: FastifyInstance, options) {
                 }
             }
         }
-    }, async (req, res) => {
-        if (req.user && parseInt(req.user.id, 10) === parseInt(req.params.id, 10)) {
+    }, async (req: FastifyRequest<{ Params: { id: number }, Body: { oldPassword: string, newPassword: string } }>, res) => {
+        if (req.user && req.user.id === req.params.id) {
             const user = await userService.getById(req.user.id);
+
+            if (user === null) {
+                res.send(new Error('UNKNOWN_USER'));
+                return;
+            }
 
             const valid = await bcrypt.compare(req.body.oldPassword, user.password);
             if (valid) {
@@ -124,9 +141,15 @@ async function routes(fastify: FastifyInstance, options) {
         }
     });
 
-    fastify.delete('/user/:id', { preValidation: [fastify.authenticate] }, async (req, res) => {
-        if (req.user && parseInt(req.user.id, 10) === parseInt(req.params.id, 10)) {
+    fastify.delete('/user/:id', { preValidation: [fastify.authenticate] }, async (req: FastifyRequest<{ Params: { id: number } }>, res) => {
+        if (req.user && req.user.id === req.params.id) {
             const user = await userService.getById(req.user.id);
+            
+            if (user === null) {
+                res.send(new Error('UNKNOWN_USER'));
+                return;
+            }
+
             return user.remove();
         } else {
             res.send(new Error('BAD_USER_ID'));

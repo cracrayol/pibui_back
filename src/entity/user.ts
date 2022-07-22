@@ -5,26 +5,26 @@ import { Playlist } from './playlist';
 export class User extends BaseEntity {
 
     @PrimaryGeneratedColumn()
-    id: number;
+    id!: number;
 
     @Column({ length: 250 })
-    email: string;
+    email!: string;
 
     @Column()
-    password: string;
+    password!: string;
 
     @OneToMany(type => Playlist, playlist => playlist.user)
-    playlists: Playlist[];
+    playlists!: Playlist[];
 
     @Column()
-    currentPlaylistId: number;
+    currentPlaylistId!: number;
 
-    @Column({default: false})
-    isAdmin: boolean;
+    @Column({ default: false })
+    isAdmin!: boolean;
 
     @CreateDateColumn()
-    createdAt: string;
+    createdAt!: string;
 
     @UpdateDateColumn()
-    updatedAt: string;
+    updatedAt!: string;
 }

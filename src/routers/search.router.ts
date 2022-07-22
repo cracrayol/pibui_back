@@ -1,10 +1,10 @@
 import { connection } from '../app';
 import { Movie } from '../entity/movie';
-import { FastifyInstance } from 'fastify';
+import { FastifyInstance, FastifyRequest } from 'fastify';
 
-async function routes(fastify: FastifyInstance, options) {
+async function routes(fastify: FastifyInstance) {
 
-    fastify.get('/:search', (req, res) => {
+    fastify.get('/:search', (req:FastifyRequest<{Params:{search:string}}>, res) => {
 
         connection.createQueryBuilder(Movie, 'movie')
             .leftJoinAndSelect('movie.author', 'author')

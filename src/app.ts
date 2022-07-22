@@ -1,12 +1,12 @@
-import 'reflect-metadata';
 
-import * as MySQLStore from 'express-mysql-session';
-import * as fastify from 'fastify';
-import * as cookie from 'fastify-cookie';
-import * as session from 'fastify-session';
-import * as fastifyStatic from 'fastify-static';
-import * as cors from 'fastify-cors';
+import session from '@fastify/session';
+import cookie from '@fastify/cookie';
+import fastify from 'fastify';
+import fastifyStatic from '@fastify/static';
+import cors from '@fastify/cors';
 import * as path from 'path';
+import * as expressSession from "express-session";
+import expressMySqlSession from "express-mysql-session";
 
 import { configuration } from './configuration';
 import { userRouter } from './routers/user.router';
@@ -14,15 +14,15 @@ import { movieRouter } from './routers/movie.router';
 import { searchRouter } from './routers/search.router';
 import { authorRouter } from './routers/author.router';
 import { playlistRouter } from './routers/playlist.router';
-import { createConnection, Connection } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { jwtPlugin } from './plugins/jwt.plugin';
 
-export let connection: Connection;
+export const connection = new DataSource(configuration.typeOrm);
 
-createConnection(configuration.typeOrm).then(conn => {
-    connection = conn;
+connection.initialize().then(() => {
 
     const app = fastify({});
+    const MySQLStore = expressMySqlSession(expressSession);
 
     /**
      * Plugins
@@ -54,7 +54,9 @@ createConnection(configuration.typeOrm).then(conn => {
     app.register(userRouter);
 
     try {
-        app.listen(configuration.server.listenPort, '::');
+        app.listen({
+            port: configuration.server.listenPort
+        });
     } catch (err) {
         app.log.error(err);
         process.exit(1);

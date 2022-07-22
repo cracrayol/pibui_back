@@ -4,35 +4,39 @@
     "description": "Backend part of Pibui",
     "main": "app.js",
     "scripts": {
-        "start": "concurrently \"npm:watch-*\"",
+        "debug": "concurrently \"npm:watch-*\"",
         "build": "tsc",
+        "start": "tsc && ./build/app.js",
         "watch-ts": "tsc -w",
         "watch-node": "nodemon --inspect ./build/app.js"
     },
     "author": "cracrayol",
     "license": "ISC",
     "dependencies": {
+        "@fastify/cookie": "^7.0.0",
+        "@fastify/cors": "^8.0.0",
+        "@fastify/jwt": "^6.2.1",
+        "@fastify/session": "^9.0.0",
+        "@fastify/static": "^6.4.0",
         "bcryptjs": "^2.4.3",
-        "express-mysql-session": "^2.1.5",
-        "fastify": "^2.15.3",
-        "fastify-cookie": "^3.6.1",
-        "fastify-cors": "^2.2.0",
-        "fastify-jwt": "^0.9.6",
-        "fastify-plugin": "^1.6.1",
-        "fastify-session": "^2.0.0",
-        "fastify-static": "^2.7.0",
+        "express-mysql-session": "^2.1.8",
+        "fastify": "^4.2.1",
+        "fastify-plugin": "^4.0.0",
         "jsonwebtoken": "^8.5.1",
         "mysql": "^2.18.1",
-        "typeorm": "^0.2.32"
+        "typeorm": "^0.3.7"
     },
     "devDependencies": {
+        "@tsconfig/node16-strictest-esm": "^1.0.3",
         "@types/bcryptjs": "^2.4.2",
         "@types/jsonwebtoken": "^8.5.1",
-        "@types/node": "^8.10.66",
-        "concurrently": "^6.0.2",
-        "eslint": "^7.24.0",
-        "nodemon": "^2.0.7",
-        "ts-node": "9.1.1",
-        "typescript": "^4.2.4"
+        "@types/express-mysql-session": "^2.1.3",
+        "@types/express-session": "^1.17.5",
+        "@types/node": "^18.0.3",
+        "concurrently": "^7.2.2",
+        "eslint": "^8.19.0",
+        "nodemon": "^2.0.19",
+        "ts-node-dev": "2.0.0",
+        "typescript": "^4.7.4"
     }
 }
