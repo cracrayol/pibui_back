@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyRegister, FastifyReply, FastifyRequest } from 'fastify';
 import fastifyPlugin from 'fastify-plugin';
 import fastifyJwt from '@fastify/jwt';
-import { configuration } from '../configuration';
+import { configuration } from '../config/configuration';
 
 async function plugin(fastify: FastifyInstance) {
 

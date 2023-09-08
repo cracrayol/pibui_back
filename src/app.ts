@@ -8,18 +8,18 @@ import * as path from 'path';
 import * as expressSession from "express-session";
 import expressMySqlSession from "express-mysql-session";
 
-import { configuration } from './configuration';
+import { configuration } from './config/configuration';
+import { AppDataSource } from './config/data-source';
 import { userRouter } from './routers/user.router';
 import { movieRouter } from './routers/movie.router';
 import { searchRouter } from './routers/search.router';
 import { authorRouter } from './routers/author.router';
 import { playlistRouter } from './routers/playlist.router';
-import { DataSource } from 'typeorm';
 import { jwtPlugin } from './plugins/jwt.plugin';
 
-export const connection = new DataSource(configuration.typeOrm);
+export const connection = AppDataSource;
 
-connection.initialize().then(() => {
+AppDataSource.initialize().then(() => {
 
     const app = fastify({});
     const MySQLStore = expressMySqlSession(expressSession);

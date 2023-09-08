@@ -36,15 +36,15 @@ export class Movie extends BaseEntity {
     @Column()
     hidden!: boolean;
 
-    @ManyToOne(type => User, {
+    @ManyToOne(() => User, {
         onDelete: 'SET NULL'
     })
     user!: User;
 
-    @ManyToOne(type => Author, author => author.movies)
+    @ManyToOne(() => Author, author => author.movies)
     author!: Author;
 
-    @ManyToMany(type => Tag)
+    @ManyToMany(() => Tag)
     @JoinTable({ name: 'movie_tag' })
     tags!: Tag[];
 

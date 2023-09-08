@@ -13,10 +13,10 @@ export class User extends BaseEntity {
     @Column()
     password!: string;
 
-    @OneToMany(type => Playlist, playlist => playlist.user)
+    @OneToMany(() => Playlist, playlist => playlist.user)
     playlists!: Playlist[];
 
-    @Column()
+    @Column({ nullable: true })
     currentPlaylistId!: number;
 
     @Column({ default: false })

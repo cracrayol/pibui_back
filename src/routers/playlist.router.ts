@@ -26,7 +26,7 @@ async function routes(fastify: FastifyInstance) {
         const playlistRequest = <Playlist>req.body;
 
         playlist.name = playlistRequest.name;
-        playlist.public = playlistRequest.public;
+        playlist.public = playlistRequest.public ? playlistRequest.public : false;
         playlist.allowedTags = playlistRequest.allowedTags;
         playlist.mandatoryTags = playlistRequest.mandatoryTags;
         playlist.forbiddenTags = playlistRequest.forbiddenTags;

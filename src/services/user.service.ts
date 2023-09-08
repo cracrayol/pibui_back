@@ -2,7 +2,7 @@ import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 import { connection } from '../app';
 import { User } from '../entity/user';
-import { configuration } from '../configuration';
+import { configuration } from '../config/configuration';
 import { Playlist } from '../entity/playlist';
 
 export class UserService {

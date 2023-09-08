@@ -13,23 +13,25 @@ export class Playlist extends BaseEntity {
     @Column()
     name!: string;
 
-    @Column()
+    @Column({
+        default: false
+    })
     public!: boolean;
 
-    @ManyToOne(type => User, user => user.playlists, {
+    @ManyToOne(() => User, user => user.playlists, {
         onDelete: 'CASCADE'
     })
     user!: User;
 
-    @ManyToMany(type => Tag)
+    @ManyToMany(() => Tag)
     @JoinTable({ name: 'playlist_f_tag' })
     forbiddenTags!: Tag[];
 
-    @ManyToMany(type => Tag)
+    @ManyToMany(() => Tag)
     @JoinTable({ name: 'playlist_a_tag' })
     allowedTags!: Tag[];
 
-    @ManyToMany(type => Tag)
+    @ManyToMany(() => Tag)
     @JoinTable({ name: 'playlist_m_tag' })
     mandatoryTags!: Tag[];
 

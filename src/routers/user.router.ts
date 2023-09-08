@@ -2,7 +2,7 @@ import { UserService } from '../services/user.service';
 import { User } from '../entity/user';
 import { FastifyInstance, FastifyRequest } from 'fastify';
 import * as bcrypt from 'bcryptjs';
-import { configuration } from '../configuration';
+import { configuration } from '../config/configuration';
 
 async function routes(fastify: FastifyInstance) {
 
@@ -79,8 +79,8 @@ async function routes(fastify: FastifyInstance) {
         }
     });
 
-    fastify.put('/user/:id', { preValidation: [fastify.authenticate] }, async (req: FastifyRequest<{ Params: { id: number } }>, res) => {
-        if (req.user && req.user.id === req.params.id) {
+    fastify.put('/user/:id', { preValidation: [fastify.authenticate] }, async (req: FastifyRequest<{ Params: { id: string } }>, res) => {
+        if (req.user && req.user.id === parseInt(req.params.id)) {
             const user = await userService.getById(req.user.id);
 
             if (user === null) {
