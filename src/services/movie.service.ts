@@ -15,14 +15,20 @@ export class MovieService {
      * @param limit Limit the number of results
      * @returns A promise
      */
-    getAll(limit?: number) {
-        return connection.createQueryBuilder(Movie, 'movie')
+    get(start: number, limit: number, sort?: string, order?:'ASC'|'DESC') {
+         let builder = connection.createQueryBuilder(Movie, 'movie')
             .where('movie.valid = 1 AND movie.errorCount < 5')
             .leftJoinAndSelect('movie.tags', 'tag')
             .leftJoinAndSelect('movie.author', 'author')
-            .take(limit)
-            .orderBy('movie.createdAt', 'DESC')
-            .getMany();
+            .skip(start)
+            .take(limit);
+
+        if(sort !== undefined && sort !== null && sort.trim() != ''
+             && order !== undefined && order !== null && order.trim() != '') {
+            builder = builder.orderBy(sort, order);
+        }            
+
+        return builder.getMany();
     }
 
     /**

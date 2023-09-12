@@ -1,4 +1,4 @@
-import { FastifyInstance, FastifyRequest } from 'fastify';
+import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { UserService } from '../services/user.service';
 import { AuthorService } from '../services/author.service';
 import { Author } from '../entity/author';
@@ -18,6 +18,10 @@ async function routes(fastify: FastifyInstance) {
                     return a.name.localeCompare(b.name);
                 }));
             });
+    });
+
+    fastify.get('/', { preValidation: [fastify.authenticateNoError] }, async (req:FastifyRequest<{Querystring:{start:number,take:number, sort?: string, order?: 'DESC'|'ASC'}}>, res: FastifyReply) => {
+        return await authorService.get(req.query.start, req.query.take, req.query.sort, req.query.order);
     });
 
     fastify.put('/:id', { preValidation: [fastify.authenticate] }, async (req:FastifyRequest<{Params:{id:number}}>, res) => {

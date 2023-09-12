@@ -16,7 +16,7 @@ async function routes(fastify: FastifyInstance) {
     const playlistService = new PlaylistService();
 
     fastify.get('/latest', async (req, res) => {
-        return await movieService.getAll(30);
+        return await movieService.get(0, 30);
     });
 
     fastify.get('/:id', { preValidation: [fastify.authenticateNoError] }, async (req:FastifyRequest<{Params:{id:number}}>, res) => {
@@ -80,8 +80,29 @@ async function routes(fastify: FastifyInstance) {
         movie.valid = movieRequest.valid;
         movie.author = movieRequest.author;
 
-        await movie.save();
-        res.send(movie);
+        res.send(await movie.save());
+    });
+
+    fastify.delete('/:id', { preValidation: [fastify.authenticate] }, async (req:FastifyRequest<{Params:{id:number}}>, res) => {
+        const movie = await movieService.getById(req.params.id);
+        const user = await userService.getById(req.user.id);
+
+        if (!movie) {
+            res.send(new Error('BAD_MOVIE_ID'));
+            return;
+        } else if (!user) {
+            res.send(new Error('BAD_USER_ID'));
+            return;
+        } else if (!user.isAdmin) {
+            res.send(new Error('NOT_ALLOWED'));
+            return;
+        }
+        
+        res.send(await movie.remove());
+    });
+
+    fastify.get('/', { preValidation: [fastify.authenticateNoError] }, async (req:FastifyRequest<{Querystring:{start:number,take:number, sort?: string, order?: 'DESC'|'ASC'}}>, res: FastifyReply) => {
+        return await movieService.get(req.query.start, req.query.take, req.query.sort, req.query.order);
     });
 
     /**
