@@ -1,64 +1,17 @@
-import { PlaylistService } from '../services/playlist.service';
-import { Playlist } from '../entity/playlist';
-import { FastifyInstance, FastifyRequest } from 'fastify';
-import { User } from '../entity/user';
+import { FastifyInstance } from 'fastify';
+import { PlaylistController } from '../controllers/playlist.controller';
 
 async function routes(fastify: FastifyInstance) {
 
-    const playlistService = new PlaylistService();
+    const playlistController = new PlaylistController();
 
-    fastify.get('/', { preValidation: [fastify.authenticate] }, async (req, res) => {
-        const playlists = await playlistService.getAll(req.user.id);
-        res.send(playlists);
-    });
+    fastify.get('/', { preValidation: [fastify.authenticate] }, playlistController.get);
 
-    fastify.put('/:id', { preValidation: [fastify.authenticate] }, async (req:FastifyRequest<{Params:{id:number}}>, res) => {
-        const playlist = await playlistService.getById(req.params.id, true);
+    fastify.put('/:id', { preValidation: [fastify.authenticate] }, playlistController.update);
 
-        if (!playlist) {
-            res.send(new Error('BAD_PLAYLIST_ID'));
-            return;
-        } else if (playlist.user.id !== req.user.id) {
-            res.send(new Error('NOT_ALLOWED'));
-            return;
-        }
+    fastify.post('/', { preValidation: [fastify.authenticate] }, playlistController.create);
 
-        const playlistRequest = <Playlist>req.body;
-
-        playlist.name = playlistRequest.name;
-        playlist.public = playlistRequest.public ? playlistRequest.public : false;
-        playlist.allowedTags = playlistRequest.allowedTags;
-        playlist.mandatoryTags = playlistRequest.mandatoryTags;
-        playlist.forbiddenTags = playlistRequest.forbiddenTags;
-
-        await playlist.save();
-        res.send(playlist);
-    });
-
-    fastify.post('/', { preValidation: [fastify.authenticate] }, async (req, res) => {
-        const playlist = new Playlist();
-        const playlistRequest = <Playlist>req.body;
-
-        playlist.name = playlistRequest.name;
-        playlist.user = <User> req.user;
-        playlist.save();
-        res.send(playlist);
-    });
-
-    fastify.delete('/:id', { preValidation: [fastify.authenticate] }, async (req:FastifyRequest<{Params:{id:number}}>, res) => {
-        const playlist = await playlistService.getById(req.params.id, true);
-
-        if (!playlist) {
-            res.send(new Error('BAD_PLAYLIST_ID'));
-            return;
-        } else if (playlist.user.id !== req.user.id) {
-            res.send(new Error('NOT_ALLOWED'));
-            return;
-        }
-
-        await playlist.remove();
-        res.send();
-    });
+    fastify.delete('/:id', { preValidation: [fastify.authenticate] }, playlistController.delete);
 }
 
 export const playlistRouter = routes;

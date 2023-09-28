@@ -1,52 +1,19 @@
-import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { UserService } from '../services/user.service';
-import { AuthorService } from '../services/author.service';
-import { Author } from '../entity/author';
-import { connection } from '../app';
+import { FastifyInstance } from 'fastify';
+import { AuthorController } from '../controllers/author.controller';
 
 async function routes(fastify: FastifyInstance) {
 
-    const authorService = new AuthorService();
-    const userService = new UserService();
+    const authorController = new AuthorController();
 
-    fastify.get('/search/:name', (req:FastifyRequest<{Params:{name:string}}>, res) => {
-        connection.createQueryBuilder(Author, 'author')
-            .where('name LIKE :name',
-                { name: '%' + req.params.name + '%' })
-            .getMany().then(result => {
-                res.send(result.sort((a, b) => {
-                    return a.name.localeCompare(b.name);
-                }));
-            });
-    });
+    fastify.get('/search/:name', authorController.search);
 
-    fastify.get('/', { preValidation: [fastify.authenticateNoError] }, async (req:FastifyRequest<{Querystring:{start:number,take:number, sort?: string, order?: 'DESC'|'ASC'}}>, res: FastifyReply) => {
-        return await authorService.get(req.query.start, req.query.take, req.query.sort, req.query.order);
-    });
+    fastify.get('/', { preValidation: [fastify.authenticateNoError] }, authorController.get);
 
-    fastify.put('/:id', { preValidation: [fastify.authenticate] }, async (req:FastifyRequest<{Params:{id:number}}>, res) => {
-        const author = await authorService.getById(req.params.id);
-        const user = await userService.getById(req.user.id);
+    fastify.post('/', { preValidation: [fastify.authenticate, fastify.isAdmin] }, authorController.create);
 
-        if (!author) {
-            res.send(new Error('BAD_AUTHOR_ID'));
-            return;
-        } else if (!user) {
-            res.send(new Error('BAD_USER_ID'));
-            return;
-        } else if (!user.isAdmin) {
-            res.send(new Error('NOT_ALLOWED'));
-            return;
-        }
+    fastify.put('/:id', { preValidation: [fastify.authenticate, fastify.isAdmin] }, authorController.update);
 
-        const authorRequest = <Author>req.body;
-
-        author.name = authorRequest.name;
-        author.subname = authorRequest.subname;
-
-        await author.save();
-        res.send(author);
-    });
+    fastify.delete('/:id', { preValidation: [fastify.authenticate, fastify.isAdmin] }, authorController.delete);
 }
 
 export const authorRouter = routes;

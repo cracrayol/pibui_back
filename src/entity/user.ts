@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, CreateDateColumn, UpdateDateColumn, BaseEntity, ManyToOne } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, CreateDateColumn, UpdateDateColumn, BaseEntity } from 'typeorm';
 import { Playlist } from './playlist';
 
 @Entity()
@@ -13,6 +13,8 @@ export class User extends BaseEntity {
     @Column()
     password!: string;
 
+    oldPassword!: string;
+    
     @OneToMany(() => Playlist, playlist => playlist.user)
     playlists!: Playlist[];
 
@@ -23,8 +25,8 @@ export class User extends BaseEntity {
     isAdmin!: boolean;
 
     @CreateDateColumn()
-    createdAt!: string;
+    createdAt!: Date;
 
     @UpdateDateColumn()
-    updatedAt!: string;
+    updatedAt!: Date;
 }

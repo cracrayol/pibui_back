@@ -1,5 +1,6 @@
 import { connection } from '../app';
 import { Movie } from '../entity/movie';
+import { rand } from '../utils/random';
 //import { google } from 'googleapis';
 //import { configuration } from '../configuration';
 
@@ -15,10 +16,14 @@ export class MovieService {
      * @param limit Limit the number of results
      * @returns A promise
      */
-    get(start: number, limit: number, sort?: string, order?:'ASC'|'DESC') {
-         let builder = connection.createQueryBuilder(Movie, 'movie')
-            .where('movie.valid = 1 AND movie.errorCount < 5')
-            .leftJoinAndSelect('movie.tags', 'tag')
+    get(start: number, limit: number, sort?: string, order?:'ASC'|'DESC', all?: boolean) {
+         let builder = connection.createQueryBuilder(Movie, 'movie');
+
+         if(!all) {
+            builder = builder.where('movie.valid = 1 AND movie.errorCount < 5');
+         }
+            
+         builder.leftJoinAndSelect('movie.tags', 'tag')
             .leftJoinAndSelect('movie.author', 'author')
             .skip(start)
             .take(limit);
@@ -38,9 +43,24 @@ export class MovieService {
      */
     getById(id: number) {
         return connection.createQueryBuilder(Movie, 'movie')
-            .where('movie.valid = 1 AND movie.errorCount < 5 AND movie.id = :id', { id })
+            .where('movie.id = :id', { id })
             .leftJoinAndSelect('movie.tags', 'tag')
             .leftJoinAndSelect('movie.author', 'author')
+            .getOne();
+    }
+
+    async getRandomFiltered(where: string, filteredIds: number[]) {
+        const result = await connection.createQueryBuilder(Movie, 'movie').select('COUNT(*)', 'count')
+            .where(where, { filteredIds })
+            .getRawOne();
+
+        return await connection.createQueryBuilder(Movie, 'movie')
+            .where(where, { filteredIds })
+            .leftJoinAndSelect('movie.tags', 'tag')
+            .leftJoinAndSelect('movie.author', 'author')
+            .take(1)
+            .skip(rand(0, result.count) - 1)
+            .orderBy('movie.id', 'ASC')
             .getOne();
     }
 
@@ -50,19 +70,15 @@ export class MovieService {
      * @returns A promise that is resolved if check is OK, else is rejected
      */
     /*async checkVideoState(movie: Movie) {
-        if (movie.linkType === 'youtube') {
-            const youtubeMovie = await youtube.videos.list({
-                id: movie.linkId,
-                part: 'status'
-            });
-            if (!youtubeMovie ||
-                youtubeMovie.data.items.length === 0 ||
-                !youtubeMovie.data.items[0].status.embeddable ||
-                youtubeMovie.data.items[0].status.privacyStatus === 'private') {
-                throw new Error('Movie blocked.');
-            }
-        } else {
-            throw new Error('Invalid linkType value for movie.');
+        const youtubeMovie = await youtube.videos.list({
+            id: movie.linkId,
+            part: 'status'
+        });
+        if (!youtubeMovie ||
+            youtubeMovie.data.items.length === 0 ||
+            !youtubeMovie.data.items[0].status.embeddable ||
+            youtubeMovie.data.items[0].status.privacyStatus === 'private') {
+            throw new Error('Movie blocked.');
         }
     }*/
 }

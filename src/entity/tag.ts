@@ -13,8 +13,8 @@ export class Tag extends BaseEntity {
     valid!: boolean;
 
     @CreateDateColumn()
-    createdAt!: string;
+    createdAt!: Date;
 
     @UpdateDateColumn()
-    updatedAt!: string;
+    updatedAt!: Date;
 }

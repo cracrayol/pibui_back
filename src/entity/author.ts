@@ -18,10 +18,10 @@ export class Author extends BaseEntity {
     movies!: Movie[];
 
     @CreateDateColumn()
-    createdAt!: string;
+    createdAt!: Date;
 
     @UpdateDateColumn()
-    updatedAt!: string;
+    updatedAt!: Date;
 
 }
 

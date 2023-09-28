@@ -36,8 +36,8 @@ export class Playlist extends BaseEntity {
     mandatoryTags!: Tag[];
 
     @CreateDateColumn()
-    createdAt!: string;
+    createdAt!: Date;
 
     @UpdateDateColumn()
-    updatedAt!: string;
+    updatedAt!: Date;
 }

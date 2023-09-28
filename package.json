@@ -5,7 +5,7 @@
    "main": "app.js",
    "scripts": {
       "build": "tsc",
-      "start": "tsnd --transpile-only --respawn --project tsconfig.json src/app.ts",
+      "start": "tsnd --transpile-only --respawn --inspect=9229 --project tsconfig.json src/app.ts",
       "typeorm": "typeorm-ts-node-commonjs"
    },
    "author": "cracrayol",

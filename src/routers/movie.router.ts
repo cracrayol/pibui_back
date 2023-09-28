@@ -1,204 +1,21 @@
-import { FastifyInstance, FastifyReply, FastifyRequest, Session } from 'fastify';
-
-import { connection } from '../app';
-
-import { MovieService } from '../services/movie.service';
-import { PlaylistService } from '../services/playlist.service';
-import { UserService } from '../services/user.service';
-
-import { Movie } from '../entity/movie';
-import { rand } from '../utils/random';
+import { FastifyInstance } from 'fastify';
+import { MovieController } from '../controllers/movie.controller';
 
 async function routes(fastify: FastifyInstance) {
 
-    const movieService = new MovieService();
-    const userService = new UserService();
-    const playlistService = new PlaylistService();
+    const movieController = new MovieController();
 
-    fastify.get('/latest', async (req, res) => {
-        return await movieService.get(0, 30);
-    });
+    fastify.get('/', movieController.getList);
 
-    fastify.get('/:id', { preValidation: [fastify.authenticateNoError] }, async (req:FastifyRequest<{Params:{id:number}}>, res) => {
-        if (req.params.id && req.params.id > 0) {
-            // Get a specific movie
-            const movie = await movieService.getById(req.params.id);
+    fastify.get('/latest', movieController.getLatest);
 
-            if (movie === null) {
-                res.send(new Error('BAD_MOVIE_ID'));
-                return;
-            }
+    fastify.get('/:id', { preValidation: [fastify.authenticateNoError] }, movieController.get);
 
-            //try {
-                //await movieService.checkVideoState(movie);
-                // movie seems OK => send it
-                if (!req.session.playedMovies) {
-                    req.session.playedMovies = [];
-                }
-                req.session.playedMovies.push(movie.id);
-                res.send(movie);
-            /*} catch (e) {
-                // Increment error count and return a random movie
-                movie.errorCount++;
-                movie.save();
+    fastify.post('/', { preValidation: [fastify.authenticate, fastify.isAdmin] }, movieController.create);
 
-                return await getRandomMovie(req, res);
-            }*/
-        } else {
-            // return a random movie
-            const movie = await getRandomMovie(req, res);
+    fastify.put('/:id', { preValidation: [fastify.authenticate, fastify.isAdmin] }, movieController.update);
 
-            if (movie === null) {
-                res.send(new Error('BAD_MOVIE_ID'));
-                return;
-            }
-
-            return movie;
-        }
-    });
-
-    fastify.put('/:id', { preValidation: [fastify.authenticate] }, async (req:FastifyRequest<{Params:{id:number}}>, res) => {
-        const movie = await movieService.getById(req.params.id);
-        const user = await userService.getById(req.user.id);
-
-        if (!movie) {
-            res.send(new Error('BAD_MOVIE_ID'));
-            return;
-        } else if (!user) {
-            res.send(new Error('BAD_USER_ID'));
-            return;
-        } else if (!user.isAdmin) {
-            res.send(new Error('NOT_ALLOWED'));
-            return;
-        }
-
-        const movieRequest = <Movie>req.body;
-
-        movie.title = movieRequest.title;
-        movie.subtitle = movieRequest.subtitle;
-        movie.linkId = movieRequest.linkId;
-        movie.valid = movieRequest.valid;
-        movie.author = movieRequest.author;
-
-        res.send(await movie.save());
-    });
-
-    fastify.delete('/:id', { preValidation: [fastify.authenticate] }, async (req:FastifyRequest<{Params:{id:number}}>, res) => {
-        const movie = await movieService.getById(req.params.id);
-        const user = await userService.getById(req.user.id);
-
-        if (!movie) {
-            res.send(new Error('BAD_MOVIE_ID'));
-            return;
-        } else if (!user) {
-            res.send(new Error('BAD_USER_ID'));
-            return;
-        } else if (!user.isAdmin) {
-            res.send(new Error('NOT_ALLOWED'));
-            return;
-        }
-        
-        res.send(await movie.remove());
-    });
-
-    fastify.get('/', { preValidation: [fastify.authenticateNoError] }, async (req:FastifyRequest<{Querystring:{start:number,take:number, sort?: string, order?: 'DESC'|'ASC'}}>, res: FastifyReply) => {
-        return await movieService.get(req.query.start, req.query.take, req.query.sort, req.query.order);
-    });
-
-    /**
-     * Return a random movie based on parameters in the request
-     * @param req The request
-     */
-    async function getRandomMovie(req: FastifyRequest, res: FastifyReply) {
-        let query = 'movie.valid = 1 AND movie.errorCount < 5';
-
-        // Filter movies to exclude already viewed movies
-        const idFilter:number[] = [];
-        if (req.session.playedMovies) {
-            idFilter.concat(req.session.playedMovies);
-        }
-        if (idFilter.length > 0) {
-            // TODO Better management (subrequest ?)
-            query += ' AND movie.id NOT IN :idFilter';
-        }
-
-        if (req.user) {
-            // If user connected, search based on the selected playlist
-            const user = await userService.getById(req.user.id);
-
-            if (user === null) {
-                res.send(new Error('BAD_USER_ID'));
-                return;
-            }
-
-            const playlist = await playlistService.getById(user.currentPlaylistId);
-            if (playlist) {
-                // If user has a playlist selected, complete the query
-                if (playlist.forbiddenTags && playlist.forbiddenTags.length > 0) {
-                    const tags: number[] = [];
-                    playlist.forbiddenTags.forEach(tag => {
-                        tags.push(tag.id);
-                    });
-                    query += ' AND movie.id NOT IN (SELECT movieId FROM movie_tag WHERE tagId IN (' + tags.join(',') + '))';
-                }
-                if (playlist.allowedTags && playlist.allowedTags.length > 0) {
-                    const tags: number[] = [];
-                    playlist.allowedTags.forEach(tag => {
-                        tags.push(tag.id);
-                    });
-                    query += ' AND id IN (SELECT movieId FROM movie_tag WHERE tagId IN (' + tags.join(',') + '))';
-                }
-                if (playlist.mandatoryTags && playlist.mandatoryTags.length > 0) {
-                    playlist.mandatoryTags.forEach(tag => {
-                        query += ' AND EXISTS (SELECT * FROM movie_tag WHERE tagId = ' + tag.id + ' AND movieId = movie.id)';
-                    });
-                }
-            }
-        }
-        return await getMovie(query, idFilter, req.session);
-    }
-
-    /**
-     * Return a movie based on the given query and update session
-     * @param query The query to execute
-     * @param idFilter Content of the idFilter query parameter
-     * @param session The session
-     */
-    async function getMovie(query: String, idFilter: number[], session: Session) {
-        const result = await connection.createQueryBuilder(Movie, 'movie').select('COUNT(*)', 'count')
-            .where(query, { idFilter })
-            .getRawOne();
-        const movieId = await connection.createQueryBuilder(Movie, 'movie')
-                .where(query, { idFilter })
-                .offset(rand(0, result.count) - 1)
-                .orderBy('movie.id', 'ASC')
-                .limit(1)
-                .getOne();
-
-        if(movieId === null) {
-            return null;
-        }
-
-        const movie = await movieService.getById(movieId.id);
-
-        if(movie === null) {
-            return null;
-        }
-
-        //try {
-            //await movieService.checkVideoState(movie);
-            if (!session.playedMovies) {
-                session.playedMovies = [];
-            }
-            session.playedMovies.push(movie.id);
-            return movie;
-        /*} catch (exception) {
-            movie.errorCount++;
-            movie.save();
-
-            return await getMovie(query, idFilter, session);
-        }*/
-    }
+    fastify.delete('/:id', { preValidation: [fastify.authenticate, fastify.isAdmin] }, movieController.delete);
 }
 
 export const movieRouter = routes;

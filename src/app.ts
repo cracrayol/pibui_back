@@ -3,6 +3,7 @@ import session from '@fastify/session';
 import cookie from '@fastify/cookie';
 import fastify from 'fastify';
 import fastifyStatic from '@fastify/static';
+import jwt from '@fastify/jwt';
 import cors from '@fastify/cors';
 import * as path from 'path';
 import * as expressSession from "express-session";
@@ -15,7 +16,7 @@ import { movieRouter } from './routers/movie.router';
 import { searchRouter } from './routers/search.router';
 import { authorRouter } from './routers/author.router';
 import { playlistRouter } from './routers/playlist.router';
-import { jwtPlugin } from './plugins/jwt.plugin';
+import { authPlugin } from './plugins/auth.plugin';
 
 export const connection = AppDataSource;
 
@@ -40,7 +41,9 @@ AppDataSource.initialize().then(() => {
             maxAge: configuration.session.maxAge * 1000
         }
     });
-    app.register(jwtPlugin);
+
+    app.register(jwt, configuration.jwt);
+    app.register(authPlugin);
     app.register(cors, configuration.cors);
 
     /**

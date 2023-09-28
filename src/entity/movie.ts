@@ -19,9 +19,6 @@ export class Movie extends BaseEntity {
     subtitle!: string;
 
     @Column({ length: 50 })
-    linkType!: string;
-
-    @Column({ length: 50 })
     linkId!: string;
 
     @Column({ type: 'tinyint' })
@@ -30,18 +27,19 @@ export class Movie extends BaseEntity {
     @Column()
     valid!: boolean;
 
-    @Column('datetime')
-    validDate!: string;
-
-    @Column()
-    hidden!: boolean;
+    @Column('datetime', {
+        nullable: true
+    })
+    validDate!: Date;
 
     @ManyToOne(() => User, {
         onDelete: 'SET NULL'
     })
     user!: User;
 
-    @ManyToOne(() => Author, author => author.movies)
+    @ManyToOne(() => Author, author => author.movies, {
+        onDelete: 'CASCADE'
+    })
     author!: Author;
 
     @ManyToMany(() => Tag)
@@ -49,8 +47,8 @@ export class Movie extends BaseEntity {
     tags!: Tag[];
 
     @CreateDateColumn()
-    createdAt!: string;
+    createdAt!: Date;
 
     @UpdateDateColumn()
-    updatedAt!: string;
+    updatedAt!: Date;
 }
