@@ -1,5 +1,6 @@
 import { connection } from '../app';
 import { Movie } from '../entity/movie';
+import { Page } from '../utils/page';
 import { rand } from '../utils/random';
 //import { google } from 'googleapis';
 //import { configuration } from '../configuration';
@@ -16,7 +17,7 @@ export class MovieService {
      * @param limit Limit the number of results
      * @returns A promise
      */
-    get(start: number, limit: number, sort?: string, order?:'ASC'|'DESC', all?: boolean) {
+    async get(start: number, limit: number, sort?: string, order?:'ASC'|'DESC', all?: boolean) {
          let builder = connection.createQueryBuilder(Movie, 'movie');
 
          if(!all) {
@@ -33,7 +34,7 @@ export class MovieService {
             builder = builder.orderBy(sort, order);
         }            
 
-        return builder.getMany();
+        return new Page(await builder.getManyAndCount());
     }
 
     /**

@@ -1,5 +1,6 @@
 import { connection } from '../app';
 import { Author } from '../entity/author';
+import { Page } from '../utils/page';
 
 export class AuthorService {
 
@@ -27,7 +28,7 @@ export class AuthorService {
      * @param limit Limit the number of results
      * @returns A promise
      */
-    get(start: number, limit: number, sort?: string, order?: 'ASC' | 'DESC') {
+    async get(start: number, limit: number, sort?: string, order?: 'ASC' | 'DESC') {
         let builder = connection.createQueryBuilder(Author, 'author')
             .skip(start)
             .take(limit);
@@ -37,6 +38,6 @@ export class AuthorService {
             builder = builder.orderBy(sort, order);
         }
 
-        return builder.getMany();
+        return new Page(await builder.getManyAndCount());
     }
 }
