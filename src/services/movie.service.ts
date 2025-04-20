@@ -21,7 +21,7 @@ export class MovieService {
          let builder = connection.createQueryBuilder(Movie, 'movie');
 
          if(!all) {
-            builder = builder.where('movie.valid = 1 AND movie.errorCount < 5');
+            builder = builder.where('movie.errorCount < 5');
          }
             
          builder.leftJoinAndSelect('movie.tags', 'tag')

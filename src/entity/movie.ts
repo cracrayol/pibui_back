@@ -25,14 +25,6 @@ export class Movie extends BaseEntity {
     @Column({ type: 'tinyint' })
     errorCount!: number;
 
-    @Column()
-    valid!: boolean;
-
-    @Column('datetime', {
-        nullable: true
-    })
-    validDate!: Date;
-
     @ManyToOne(() => User, {
         onDelete: 'SET NULL'
     })

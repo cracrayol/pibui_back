@@ -9,9 +9,6 @@ export class Tag extends BaseEntity {
     @Column({ length: 100 })
     name!: string;
 
-    @Column()
-    valid!: boolean;
-
     @CreateDateColumn()
     createdAt!: Date;
 

@@ -7,7 +7,7 @@ export class SearchService {
     async search(search: string) {
         return new Page(await connection.createQueryBuilder(Movie, 'movie')
             .leftJoinAndSelect('movie.author', 'author')
-            .where('movie.valid = 1 AND (MATCH(title) AGAINST(:search IN NATURAL LANGUAGE MODE) OR MATCH(name) AGAINST(:search IN NATURAL LANGUAGE MODE))',
+            .where('(MATCH(title) AGAINST(:search IN NATURAL LANGUAGE MODE) OR MATCH(name) AGAINST(:search IN NATURAL LANGUAGE MODE))',
                 { search })
             .orderBy('movie.title')
             .getManyAndCount());

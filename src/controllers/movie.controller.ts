@@ -55,7 +55,6 @@ export class MovieController {
         movie.title = movieRequest.title;
         movie.subtitle = movieRequest.subtitle;
         movie.linkId = movieRequest.linkId;
-        movie.valid = movieRequest.valid;
 
         if (movieRequest.author.id == null) {
             const author = new Author();
@@ -71,7 +70,6 @@ export class MovieController {
             if (tag.id == null) {
                 const newTag = new Tag();
                 newTag.name = tag.name;
-                newTag.valid = true;
 
                 tag = await newTag.save();
             }
@@ -80,10 +78,6 @@ export class MovieController {
 
         movie.errorCount = 0;
         movie.user = req.user;
-
-        if (movie.valid) {
-            movie.validDate = new Date();
-        }
 
         return await movie.save();
     }
@@ -97,14 +91,9 @@ export class MovieController {
 
         const movieRequest = <Movie>req.body;
 
-        if (!movie.valid && movieRequest.valid) {
-            movie.validDate = new Date();
-        }
-
         movie.title = movieRequest.title;
         movie.subtitle = movieRequest.subtitle;
         movie.linkId = movieRequest.linkId;
-        movie.valid = movieRequest.valid;
         movie.author = movieRequest.author;
 
         movie.tags = [];
@@ -112,8 +101,6 @@ export class MovieController {
             if (tag.id == null) {
                 const newTag = new Tag();
                 newTag.name = tag.name;
-                newTag.valid = true;
-
                 tag = await newTag.save();
             }
             movie.tags.push(tag);
@@ -141,7 +128,7 @@ export class MovieController {
      * @param req The request
      */
     private async getRandomMovie(req: FastifyRequest) {
-        let query = 'movie.valid = 1 AND movie.errorCount < 5';
+        let query = 'movie.errorCount < 5';
 
         // Filter movies to exclude already viewed movies
         const idFilter: number[] = [];
