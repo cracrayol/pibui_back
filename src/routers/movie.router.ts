@@ -16,6 +16,8 @@ async function routes(fastify: FastifyInstance) {
     fastify.put('/:id', { preValidation: [fastify.authenticate, fastify.isAdmin] }, movieController.update);
 
     fastify.delete('/:id', { preValidation: [fastify.authenticate, fastify.isAdmin] }, movieController.delete);
+
+    fastify.get('/tags/:name', movieController.searchTags);
 }
 
 export const movieRouter = routes;

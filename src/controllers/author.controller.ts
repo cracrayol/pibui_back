@@ -44,7 +44,7 @@ export class AuthorController {
             return new Error('BAD_AUTHOR_ID');
         }
         
-        return await author.remove();
+        return await author.softRemove();
     }
 
 }

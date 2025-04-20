@@ -1,5 +1,6 @@
 import {
-    Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinTable, CreateDateColumn, UpdateDateColumn, BaseEntity, OneToMany, ManyToMany
+    Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinTable, CreateDateColumn, UpdateDateColumn, BaseEntity, OneToMany, ManyToMany,
+    DeleteDateColumn
 } from 'typeorm';
 import { User } from './user';
 import { Tag } from './tag';
@@ -40,4 +41,7 @@ export class Playlist extends BaseEntity {
 
     @UpdateDateColumn()
     updatedAt!: Date;
+    
+    @DeleteDateColumn()
+    deletedAt!: Date;
 }

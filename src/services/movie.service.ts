@@ -64,22 +64,4 @@ export class MovieService {
             .orderBy('movie.id', 'ASC')
             .getOne();
     }
-
-    /**
-     * Check the given movie.
-     * @param movie Movie to check
-     * @returns A promise that is resolved if check is OK, else is rejected
-     */
-    /*async checkVideoState(movie: Movie) {
-        const youtubeMovie = await youtube.videos.list({
-            id: movie.linkId,
-            part: 'status'
-        });
-        if (!youtubeMovie ||
-            youtubeMovie.data.items.length === 0 ||
-            !youtubeMovie.data.items[0].status.embeddable ||
-            youtubeMovie.data.items[0].status.privacyStatus === 'private') {
-            throw new Error('Movie blocked.');
-        }
-    }*/
 }

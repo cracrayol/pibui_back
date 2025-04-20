@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, CreateDateColumn, UpdateDateColumn, BaseEntity } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, CreateDateColumn, UpdateDateColumn, BaseEntity, DeleteDateColumn } from 'typeorm';
 import { Playlist } from './playlist';
 
 @Entity()
@@ -29,4 +29,7 @@ export class User extends BaseEntity {
 
     @UpdateDateColumn()
     updatedAt!: Date;
+    
+    @DeleteDateColumn()
+    deletedAt!: Date;
 }

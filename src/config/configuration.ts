@@ -21,9 +21,7 @@ export const configuration = {
     },
     cors: {
         origin: 'http://127.0.0.1:4200',
-        credentials: true
-    },
-    /*youtube: {
-        apiKey: '<Your_Youtube_API_Key>'
-    },*/
+        credentials: true,
+        methods: ['GET', 'HEAD', 'POST', 'PUT', 'DELETE']
+    }
 };

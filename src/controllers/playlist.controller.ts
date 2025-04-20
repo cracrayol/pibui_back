@@ -49,7 +49,7 @@ export class PlaylistController {
             return new Error('NOT_ALLOWED');
         }
 
-        await playlist.remove();
+        await playlist.softRemove();
     }
 
 }

@@ -1,5 +1,6 @@
 import {
-    Entity, Column, PrimaryGeneratedColumn, ManyToOne, ManyToMany, JoinTable, CreateDateColumn, UpdateDateColumn, BaseEntity, Index
+    Entity, Column, PrimaryGeneratedColumn, ManyToOne, ManyToMany, JoinTable, CreateDateColumn, UpdateDateColumn, BaseEntity, Index,
+    DeleteDateColumn
 } from 'typeorm';
 import { User } from './user';
 import { Tag } from './tag';
@@ -51,4 +52,7 @@ export class Movie extends BaseEntity {
 
     @UpdateDateColumn()
     updatedAt!: Date;
+
+    @DeleteDateColumn()
+    deletedAt!: Date;
 }

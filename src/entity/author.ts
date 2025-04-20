@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, CreateDateColumn, UpdateDateColumn, BaseEntity, Index } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, CreateDateColumn, UpdateDateColumn, BaseEntity, Index, DeleteDateColumn } from 'typeorm';
 import { Movie } from './movie';
 
 @Entity()
@@ -22,6 +22,8 @@ export class Author extends BaseEntity {
 
     @UpdateDateColumn()
     updatedAt!: Date;
-
+    
+    @DeleteDateColumn()
+    deletedAt!: Date;
 }
 

@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, BaseEntity } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, BaseEntity, DeleteDateColumn } from 'typeorm';
 
 @Entity()
 export class Tag extends BaseEntity {
@@ -17,4 +17,7 @@ export class Tag extends BaseEntity {
 
     @UpdateDateColumn()
     updatedAt!: Date;
+    
+    @DeleteDateColumn()
+    deletedAt!: Date;
 }

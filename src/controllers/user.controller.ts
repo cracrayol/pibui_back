@@ -66,7 +66,7 @@ export class UserController {
                 return new Error('UNKNOWN_USER');
             }
 
-            return user.remove();
+            return user.softRemove();
         } else {
             return new Error('BAD_USER_ID');
         }
