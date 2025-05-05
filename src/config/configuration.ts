@@ -2,7 +2,7 @@ import type  { Options } from 'express-mysql-session';
 
 export const configuration = {
     server: {
-        'listenPort': 4300
+        'port': 4300
     },
     jwt: {
         secret: '<your secret key>',

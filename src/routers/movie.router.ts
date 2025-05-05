@@ -7,8 +7,6 @@ async function routes(fastify: FastifyInstance) {
 
     fastify.get('/', movieController.getList);
 
-    fastify.get('/latest', movieController.getLatest);
-
     fastify.get('/:id', { preValidation: [fastify.authenticateNoError] }, movieController.get);
 
     fastify.post('/', { preValidation: [fastify.authenticate, fastify.isAdmin] }, movieController.create);

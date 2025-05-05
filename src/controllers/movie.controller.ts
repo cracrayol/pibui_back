@@ -12,12 +12,8 @@ export class MovieController {
     playlistService = new PlaylistService();
     tagService = new TagService();
 
-    getList = async (req: FastifyRequest<{ Querystring: { start: number, take: number, sort?: string, order?: 'DESC' | 'ASC', all?: boolean } }>) => {
-        return await this.movieService.get(req.query.start, req.query.take, req.query.sort, req.query.order, req.query.all);
-    };
-
-    getLatest = async () => {
-        return await this.movieService.get(0, 30);
+    getList = async (req: FastifyRequest<{ Querystring: { filter: string, start: number, take: number, sort?: string, order?: 'DESC' | 'ASC', all?: boolean } }>) => {
+        return await this.movieService.get(req.query.filter, req.query.start, req.query.take, req.query.sort, req.query.order, req.query.all);
     };
 
     get = async (req: FastifyRequest<{ Params: { id: number } }>, res: FastifyReply) => {

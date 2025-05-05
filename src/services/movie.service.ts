@@ -17,17 +17,23 @@ export class MovieService {
      * @param limit Limit the number of results
      * @returns A promise
      */
-    async get(start: number, limit: number, sort?: string, order?:'ASC'|'DESC', all?: boolean) {
+    async get(filter: string, start: number, limit: number, sort?: string, order?:'ASC'|'DESC', all?: boolean) {
          let builder = connection.createQueryBuilder(Movie, 'movie');
 
-         if(!all) {
-            builder = builder.where('movie.errorCount < 5');
-         }
-            
          builder.leftJoinAndSelect('movie.tags', 'tag')
             .leftJoinAndSelect('movie.author', 'author')
+            .where('1')
             .skip(start)
             .take(limit);
+        
+        if(filter != '') {
+            builder = builder.andWhere('(MATCH(movie.title) AGAINST(:filter IN BOOLEAN MODE) OR MATCH(author.name) AGAINST(:filter IN BOOLEAN MODE))',
+                { filter: filter + '*' })
+        }
+        
+        if(!all) {
+            builder = builder.andWhere('movie.errorCount < 5');
+        }
 
         if(sort !== undefined && sort !== null && sort.trim() != ''
              && order !== undefined && order !== null && order.trim() != '') {

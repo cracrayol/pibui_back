@@ -13,7 +13,6 @@ import { configuration } from './config/configuration';
 import { AppDataSource } from './config/data-source';
 import { userRouter } from './routers/user.router';
 import { movieRouter } from './routers/movie.router';
-import { searchRouter } from './routers/search.router';
 import { authorRouter } from './routers/author.router';
 import { playlistRouter } from './routers/playlist.router';
 import { authPlugin } from './plugins/auth.plugin';
@@ -32,6 +31,10 @@ AppDataSource.initialize().then(() => {
     app.register(fastifyStatic, {
         root: path.join(__dirname, 'static')
     });
+    app.get('/play/:id', function (req, reply) {
+        reply.sendFile('index.html');
+      })
+
     app.register(cookie);
     app.register(session, {
         secret: configuration.session.secret,
@@ -52,14 +55,11 @@ AppDataSource.initialize().then(() => {
 
     app.register(movieRouter, { prefix: '/movie'});
     app.register(authorRouter, { prefix: '/author'});
-    app.register(searchRouter, { prefix: '/search'});
     app.register(playlistRouter, { prefix: '/playlist'});
     app.register(userRouter);
 
     try {
-        app.listen({
-            port: configuration.server.listenPort
-        });
+        app.listen(configuration.server);
     } catch (err) {
         app.log.error(err);
         process.exit(1);
