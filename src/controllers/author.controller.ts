@@ -6,12 +6,8 @@ export class AuthorController {
 
     authorService = new AuthorService();
 
-    search = async (req:FastifyRequest<{Params:{name:string}}>) => {
-        return await this.authorService.getByNameLike(req.params.name != null ? req.params.name : '');
-    }
-
-    get = async (req:FastifyRequest<{Querystring:{start:number,take:number, sort?: string, order?: 'DESC'|'ASC'}}>) => {
-        return await this.authorService.get(req.query.start, req.query.take, req.query.sort, req.query.order);
+    get = async (req:FastifyRequest<{Querystring:{filter: string, start:number,take:number, sort?: string, order?: 'DESC'|'ASC'}}>) => {
+        return await this.authorService.get(req.query.filter, req.query.start, req.query.take, req.query.sort, req.query.order);
     }
 
     create = async (req:FastifyRequest<{Params:{id:number}, Body: Author}>) => {

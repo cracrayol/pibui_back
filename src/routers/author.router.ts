@@ -5,8 +5,6 @@ async function routes(fastify: FastifyInstance) {
 
     const authorController = new AuthorController();
 
-    fastify.get('/search/:name', authorController.search);
-
     fastify.get('/', { preValidation: [fastify.authenticateNoError] }, authorController.get);
 
     fastify.post('/', { preValidation: [fastify.authenticate, fastify.isAdmin] }, authorController.create);

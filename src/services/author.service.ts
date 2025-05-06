@@ -15,23 +15,20 @@ export class AuthorService {
             .getOne();
     }
 
-    async getByNameLike(name: string) {
-        return await connection.createQueryBuilder(Author, 'author')
-            .where('name LIKE :name',
-                { name: '%' + name + '%' })
-            .orderBy('author.name')
-            .getMany();
-    }
-
     /**
      * Return all the movies, ordered by validation date
      * @param limit Limit the number of results
      * @returns A promise
      */
-    async get(start: number, limit: number, sort?: string, order?: 'ASC' | 'DESC') {
+    async get(filter: string, start: number, limit: number, sort?: string, order?: 'ASC' | 'DESC') {
         let builder = connection.createQueryBuilder(Author, 'author')
             .skip(start)
             .take(limit);
+
+        if(filter != '') {
+            builder = builder.where('MATCH(author.name) AGAINST(:filter IN BOOLEAN MODE)',
+                { filter: filter + '*' })
+        }
 
         if (sort !== undefined && sort !== null && sort.trim() != ''
             && order !== undefined && order !== null && order.trim() != '') {
