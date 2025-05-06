@@ -19,6 +19,8 @@ export class MovieController {
     get = async (req: FastifyRequest<{ Params: { id: number }, Querystring: {lastOnError: string} }>, res: FastifyReply) => {
         if (!req.session.playedMovies) {
             req.session.playedMovies = [];
+        } else if(req.session.playedMovies.length >= 500) {
+            req.session.playedMovies.splice(0,1);
         }
 
         if(req.query.lastOnError === 'true' && req.session.playedMovies.length > 0) {
@@ -37,7 +39,7 @@ export class MovieController {
             }
             
             req.session.playedMovies.push(movie.id);
-            res.send(movie);
+            return movie;
         } else {
             // return a random movie
             const movie = await this.getRandomMovie(req);
@@ -159,7 +161,7 @@ export class MovieController {
                     playlist.allowedTags.forEach(tag => {
                         tags.push(tag.id);
                     });
-                    query += ' AND id IN (SELECT movieId FROM movie_tag WHERE tagId IN (' + tags.join(',') + '))';
+                    query += ' AND movie.id IN (SELECT movieId FROM movie_tag WHERE tagId IN (' + tags.join(',') + '))';
                 }
                 if (playlist.mandatoryTags && playlist.mandatoryTags.length > 0) {
                     playlist.mandatoryTags.forEach(tag => {
@@ -168,23 +170,15 @@ export class MovieController {
                 }
             }
         }
-        return await this.getMovie(query, idFilter, req.session);
-    }
 
-    /**
-     * Return a movie based on the given query and update session
-     * @param query The query to execute
-     * @param idFilter Content of the idFilter query parameter
-     * @param session The session
-     */
-    private async getMovie(query: string, idFilter: number[], session: Session) {
-        const movie = await this.movieService.getRandomFiltered(query, idFilter);
+        let movie = await this.movieService.getRandomFiltered(query, idFilter);
 
         if (movie === null) {
-            return null;
+            req.session.playedMovies = [];
+            movie = await this.movieService.getRandomFiltered(query, []);
         }
 
-        session.playedMovies.push(movie.id);
+        req.session.playedMovies.push(movie.id);
         return movie;
     }
 
