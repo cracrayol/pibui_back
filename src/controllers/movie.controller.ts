@@ -16,7 +16,17 @@ export class MovieController {
         return await this.movieService.get(req.query.filter, req.query.start, req.query.take, req.query.sort, req.query.order, req.query.all);
     };
 
-    get = async (req: FastifyRequest<{ Params: { id: number } }>, res: FastifyReply) => {
+    get = async (req: FastifyRequest<{ Params: { id: number }, Querystring: {lastOnError: string} }>, res: FastifyReply) => {
+        if (!req.session.playedMovies) {
+            req.session.playedMovies = [];
+        }
+
+        if(req.query.lastOnError === 'true' && req.session.playedMovies.length > 0) {
+            const movie = await this.movieService.getById(req.session.playedMovies.pop());
+            movie.errorCount++;
+            await movie.save();
+        }
+
         if (req.params.id && req.params.id > 0) {
             // Get a specific movie
             const movie = await this.movieService.getById(req.params.id);
@@ -25,10 +35,7 @@ export class MovieController {
                 res.send(new Error('BAD_MOVIE_ID'));
                 return;
             }
-
-            if (!req.session.playedMovies) {
-                req.session.playedMovies = [];
-            }
+            
             req.session.playedMovies.push(movie.id);
             res.send(movie);
         } else {
@@ -177,9 +184,6 @@ export class MovieController {
             return null;
         }
 
-        if (!session.playedMovies) {
-            session.playedMovies = [];
-        }
         session.playedMovies.push(movie.id);
         return movie;
     }

@@ -12,7 +12,7 @@ export class UserController {
     create = async (req:FastifyRequest<{Body:User}>) => {
         const user = new User();
         user.email = req.body.email;
-        user.password = await bcrypt.hash(req.body.password, configuration.jwt.saltRounds);;
+        user.password = await bcrypt.hash(req.body.password, configuration.jwt.saltRounds);
         user.isAdmin = false;
         return user.save();
     }

@@ -23,5 +23,8 @@ export const configuration = {
         origin: 'http://127.0.0.1:4200',
         credentials: true,
         methods: ['GET', 'HEAD', 'POST', 'PUT', 'DELETE']
+    },
+    cookie: {
+        secret: '<a secret with minimum length of 20 characters>'
     }
 };

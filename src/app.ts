@@ -35,13 +35,14 @@ AppDataSource.initialize().then(() => {
         reply.sendFile('index.html');
       })
 
-    app.register(cookie);
+    app.register(cookie, configuration.cookie);
     app.register(session, {
         secret: configuration.session.secret,
         store: new MySQLStore(configuration.sessionStore),
         saveUninitialized: false,
         cookie: {
-            maxAge: configuration.session.maxAge * 1000
+            maxAge: configuration.session.maxAge * 1000,
+            secure: 'auto'
         }
     });
 
