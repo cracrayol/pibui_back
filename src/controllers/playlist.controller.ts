@@ -16,6 +16,10 @@ export class PlaylistController {
         const playlistRequest = <Playlist>req.body;
 
         playlist.name = playlistRequest.name;
+        playlist.public = playlistRequest.public ? playlistRequest.public : false;
+        playlist.allowedTags = playlistRequest.allowedTags;
+        playlist.mandatoryTags = playlistRequest.mandatoryTags;
+        playlist.forbiddenTags = playlistRequest.forbiddenTags;
         playlist.user = <User> req.user;
         return await playlist.save();
     }
