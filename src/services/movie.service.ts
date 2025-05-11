@@ -17,7 +17,7 @@ export class MovieService {
      * @param limit Limit the number of results
      * @returns A promise
      */
-    async get(filter: string, start: number, limit: number, sort?: string, order?:'ASC'|'DESC', all?: boolean) {
+    async get(filter: string, start: number, limit: number, sort?: string, order?:'ASC'|'DESC') {
          let builder = connection.createQueryBuilder(Movie, 'movie');
 
          builder.leftJoinAndSelect('movie.tags', 'tag')
@@ -29,10 +29,6 @@ export class MovieService {
         if(filter != '') {
             builder = builder.andWhere('(MATCH(movie.title) AGAINST(:filter IN BOOLEAN MODE) OR MATCH(author.name) AGAINST(:filter IN BOOLEAN MODE))',
                 { filter: filter + '*' })
-        }
-        
-        if(!all) {
-            builder = builder.andWhere('movie.errorCount < 5');
         }
 
         if(sort !== undefined && sort !== null && sort.trim() != ''

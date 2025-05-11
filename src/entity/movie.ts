@@ -19,7 +19,7 @@ export class Movie extends BaseEntity {
     @Column({ length: 500 })
     subtitle!: string;
 
-    @Column({ length: 50 })
+    @Column({ length: 50, unique: true })
     linkId!: string;
 
     @Column({ type: 'tinyint' })

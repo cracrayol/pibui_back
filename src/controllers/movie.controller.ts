@@ -12,8 +12,8 @@ export class MovieController {
     playlistService = new PlaylistService();
     tagService = new TagService();
 
-    getList = async (req: FastifyRequest<{ Querystring: { filter: string, start: number, take: number, sort?: string, order?: 'DESC' | 'ASC', all?: boolean } }>) => {
-        return await this.movieService.get(req.query.filter, req.query.start, req.query.take, req.query.sort, req.query.order, req.query.all);
+    getList = async (req: FastifyRequest<{ Querystring: { filter: string, start: number, take: number, sort?: string, order?: 'DESC' | 'ASC' } }>) => {
+        return await this.movieService.get(req.query.filter, req.query.start, req.query.take, req.query.sort, req.query.order);
     };
 
     get = async (req: FastifyRequest<{ Params: { id: number }, Querystring: {lastOnError: string} }>, res: FastifyReply) => {
@@ -26,7 +26,11 @@ export class MovieController {
         if(req.query.lastOnError === 'true' && req.session.playedMovies.length > 0) {
             const movie = await this.movieService.getById(req.session.playedMovies.pop());
             movie.errorCount++;
-            await movie.save();
+            if(movie.errorCount >= 5) {
+                await movie.softRemove();
+            } else {
+                await movie.save();
+            }
         }
 
         if (req.params.id && req.params.id > 0) {
@@ -133,7 +137,7 @@ export class MovieController {
      * @param req The request
      */
     private async getRandomMovie(req: FastifyRequest) {
-        let query = 'movie.errorCount < 5';
+        let conditions:string[] = [];
 
         // Filter movies to exclude already viewed movies
         const idFilter: number[] = [];
@@ -141,8 +145,7 @@ export class MovieController {
             idFilter.concat(req.session.playedMovies);
         }
         if (idFilter.length > 0) {
-            // TODO Better management (subrequest ?)
-            query += ' AND movie.id NOT IN :idFilter';
+            conditions.push('movie.id NOT IN :idFilter');
         }
 
         if (req.user) {
@@ -154,28 +157,28 @@ export class MovieController {
                     playlist.forbiddenTags.forEach(tag => {
                         tags.push(tag.id);
                     });
-                    query += ' AND movie.id NOT IN (SELECT movieId FROM movie_tag WHERE tagId IN (' + tags.join(',') + '))';
+                    conditions.push('movie.id NOT IN (SELECT movieId FROM movie_tag WHERE tagId IN (' + tags.join(',') + '))');
                 }
                 if (playlist.allowedTags && playlist.allowedTags.length > 0) {
                     const tags: number[] = [];
                     playlist.allowedTags.forEach(tag => {
                         tags.push(tag.id);
                     });
-                    query += ' AND movie.id IN (SELECT movieId FROM movie_tag WHERE tagId IN (' + tags.join(',') + '))';
+                    conditions.push('movie.id IN (SELECT movieId FROM movie_tag WHERE tagId IN (' + tags.join(',') + '))');
                 }
                 if (playlist.mandatoryTags && playlist.mandatoryTags.length > 0) {
                     playlist.mandatoryTags.forEach(tag => {
-                        query += ' AND EXISTS (SELECT * FROM movie_tag WHERE tagId = ' + tag.id + ' AND movieId = movie.id)';
+                        conditions.push('EXISTS (SELECT * FROM movie_tag WHERE tagId = ' + tag.id + ' AND movieId = movie.id)');
                     });
                 }
             }
         }
 
-        let movie = await this.movieService.getRandomFiltered(query, idFilter);
+        let movie = await this.movieService.getRandomFiltered(conditions.join(' AND '), idFilter);
 
         if (movie === null) {
             req.session.playedMovies = [];
-            movie = await this.movieService.getRandomFiltered(query, []);
+            movie = await this.movieService.getRandomFiltered(conditions.join(' AND '), []);
         }
 
         req.session.playedMovies.push(movie.id);
