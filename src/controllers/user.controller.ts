@@ -39,7 +39,7 @@ export class UserController {
 
             return await user.save();
         } else {
-            return new Error('BAD_USER_ID');
+            return new Error('NOT_ALLOWED');
         }
     }
 
@@ -68,7 +68,7 @@ export class UserController {
 
             return user.softRemove();
         } else {
-            return new Error('BAD_USER_ID');
+            return new Error('NOT_ALLOWED');
         }
     }
 

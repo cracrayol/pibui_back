@@ -58,6 +58,10 @@ export class MovieController {
     }
 
     create = async (req: FastifyRequest<{ Params: { id: number } }>) => {
+        if (!req.user.isAdmin) {
+            return new Error('NOT_ALLOWED');
+        }
+
         const movie = new Movie();
         const movieRequest = <Movie>req.body;
 
@@ -92,6 +96,10 @@ export class MovieController {
     }
 
     update = async (req: FastifyRequest<{ Params: { id: number } }>) => {
+        if (!req.user.isAdmin) {
+            return new Error('NOT_ALLOWED');
+        }
+
         const movie = await this.movieService.getById(req.params.id);
 
         if (!movie) {
@@ -119,6 +127,10 @@ export class MovieController {
     }
 
     delete = async (req: FastifyRequest<{ Params: { id: number } }>) => {
+        if (!req.user.isAdmin) {
+            return new Error('NOT_ALLOWED');
+        }
+
         const movie = await this.movieService.getById(req.params.id);
 
         if (!movie) {

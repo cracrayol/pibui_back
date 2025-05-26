@@ -11,6 +11,10 @@ export class AuthorController {
     }
 
     create = async (req:FastifyRequest<{Params:{id:number}, Body: Author}>) => {
+        if (!req.user.isAdmin) {
+            return new Error('NOT_ALLOWED');
+        }
+
         const author = new Author();
         const authorRequest = req.body;
 
@@ -21,6 +25,10 @@ export class AuthorController {
     }
 
     update = async (req:FastifyRequest<{Params:{id:number}, Body: Author}>): Promise<Author|Error> => {
+        if (!req.user.isAdmin) {
+            return new Error('NOT_ALLOWED');
+        }
+
         const author = await this.authorService.getById(req.params.id);
         
         if (!author) {
@@ -34,6 +42,10 @@ export class AuthorController {
     }
 
     delete = async (req:FastifyRequest<{Params:{id:number}}>) => {
+        if (!req.user.isAdmin) {
+            return new Error('NOT_ALLOWED');
+        }
+        
         const author = await this.authorService.getById(req.params.id);
 
         if (!author) {
