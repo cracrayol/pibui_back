@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, BaseEntity, DeleteDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, BaseEntity, DeleteDateColumn, Index } from 'typeorm';
 
 @Entity()
 export class Tag extends BaseEntity {
@@ -7,6 +7,7 @@ export class Tag extends BaseEntity {
     id!: number;
 
     @Column({ length: 100 })
+    @Index({ fulltext: true })
     name!: string;
 
     @CreateDateColumn()

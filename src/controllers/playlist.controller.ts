@@ -11,15 +11,13 @@ export class PlaylistController {
         return await this.playlistService.getAll(req.user.id);
     }
 
-    create = async (req:FastifyRequest<{Params:{search:string}}>) => {
+    create = async (req:FastifyRequest<{Body:Playlist}>) => {
         const playlist = new Playlist();
-        const playlistRequest = <Playlist>req.body;
-
-        playlist.name = playlistRequest.name;
-        playlist.public = playlistRequest.public ? playlistRequest.public : false;
-        playlist.allowedTags = playlistRequest.allowedTags;
-        playlist.mandatoryTags = playlistRequest.mandatoryTags;
-        playlist.forbiddenTags = playlistRequest.forbiddenTags;
+        playlist.name = req.body.name;
+        playlist.public = req.body.public ? req.body.public : false;
+        playlist.allowedTags = req.body.allowedTags;
+        playlist.mandatoryTags = req.body.mandatoryTags;
+        playlist.forbiddenTags = req.body.forbiddenTags;
         playlist.user = <User> req.user;
         return await playlist.save();
     }

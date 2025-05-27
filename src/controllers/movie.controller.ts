@@ -57,29 +57,27 @@ export class MovieController {
         }
     }
 
-    create = async (req: FastifyRequest<{ Params: { id: number } }>) => {
+    create = async (req: FastifyRequest<{Body: Movie}>) => {
         if (!req.user.isAdmin) {
             return new Error('NOT_ALLOWED');
         }
 
         const movie = new Movie();
-        const movieRequest = <Movie>req.body;
+        movie.title = req.body.title;
+        movie.subtitle = req.body.subtitle;
+        movie.linkId = req.body.linkId;
 
-        movie.title = movieRequest.title;
-        movie.subtitle = movieRequest.subtitle;
-        movie.linkId = movieRequest.linkId;
-
-        if (movieRequest.author.id == null) {
+        if (req.body.author.id == null) {
             const author = new Author();
-            author.name = movieRequest.author.name;
+            author.name = req.body.author.name;
             author.subname = '';
             movie.author = await author.save();
         } else {
-            movie.author = movieRequest.author;
+            movie.author = req.body.author;
         }
 
         movie.tags = [];
-        for (let tag of movieRequest.tags) {
+        for (let tag of req.body.tags) {
             if (tag.id == null) {
                 const newTag = new Tag();
                 newTag.name = tag.name;

@@ -15,6 +15,7 @@ import { userRouter } from './routers/user.router';
 import { movieRouter } from './routers/movie.router';
 import { authorRouter } from './routers/author.router';
 import { playlistRouter } from './routers/playlist.router';
+import { tagRouter } from './routers/tag.router';
 import { authPlugin } from './plugins/auth.plugin';
 
 export const connection = AppDataSource;
@@ -57,6 +58,7 @@ AppDataSource.initialize().then(() => {
     app.register(movieRouter, { prefix: '/movie'});
     app.register(authorRouter, { prefix: '/author'});
     app.register(playlistRouter, { prefix: '/playlist'});
+    app.register(tagRouter, { prefix: '/tag'});
     app.register(userRouter);
 
     try {

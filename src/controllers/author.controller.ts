@@ -10,16 +10,14 @@ export class AuthorController {
         return await this.authorService.get(req.query.filter, req.query.start, req.query.take, req.query.sort, req.query.order);
     }
 
-    create = async (req:FastifyRequest<{Params:{id:number}, Body: Author}>) => {
+    create = async (req:FastifyRequest<{Body: Author}>) => {
         if (!req.user.isAdmin) {
             return new Error('NOT_ALLOWED');
         }
 
         const author = new Author();
-        const authorRequest = req.body;
-
-        author.name = authorRequest.name;
-        author.subname = authorRequest.subname;
+        author.name = req.body.name;
+        author.subname = req.body.subname;
 
         return await author.save();
     }
