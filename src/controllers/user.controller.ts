@@ -25,9 +25,7 @@ export class UserController {
                 return new Error('UNKNOWN_USER');
             }
 
-            if(req.body.currentPlaylistId != null) {
-                user.currentPlaylistId = req.body.currentPlaylistId;
-            }
+            user.currentPlaylistId = req.body.currentPlaylistId;
 
             if(req.body.oldPassword != null && req.body.password != null) {
                 if (await bcrypt.compare(req.body.oldPassword, user.password)) {

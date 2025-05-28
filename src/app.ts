@@ -34,7 +34,10 @@ AppDataSource.initialize().then(() => {
     });
     app.get('/play/:id', function (req, reply) {
         reply.sendFile('index.html');
-      })
+    })
+    app.get('/admin', function (req, reply) {
+        reply.sendFile('index.html');
+    })
 
     app.register(cookie, configuration.cookie);
     app.register(session, {
