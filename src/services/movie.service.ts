@@ -2,13 +2,6 @@ import { connection } from '../app';
 import { Movie } from '../entity/movie';
 import { Page } from '../utils/page';
 import { rand } from '../utils/random';
-//import { google } from 'googleapis';
-//import { configuration } from '../configuration';
-
-/*const youtube = google.youtube({
-    version: 'v3',
-    auth: configuration.youtube.apiKey
-});*/
 
 export class MovieService {
 
@@ -16,13 +9,13 @@ export class MovieService {
      * Return all the movies, ordered by validation date
      * @param limit Limit the number of results
      * @returns A promise
-     */
-    async get(filter: string, start: number, limit: number, sort?: string, order?:'ASC'|'DESC') {
+     */string
+    async get(filter: string, start: number, limit: number, sort?: string, order?:'ASC'|'DESC', notValidated?: string) {
          let builder = connection.createQueryBuilder(Movie, 'movie');
 
          builder.leftJoinAndSelect('movie.tags', 'tag')
             .leftJoinAndSelect('movie.author', 'author')
-            .where('1')
+            .where('validated = ' + (notValidated === 'true' ? '0' : '1'))
             .skip(start)
             .take(limit);
         

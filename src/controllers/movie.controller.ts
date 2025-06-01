@@ -12,8 +12,8 @@ export class MovieController {
     playlistService = new PlaylistService();
     tagService = new TagService();
 
-    getList = async (req: FastifyRequest<{ Querystring: { filter: string, start: number, take: number, sort?: string, order?: 'DESC' | 'ASC' } }>) => {
-        return await this.movieService.get(req.query.filter, req.query.start, req.query.take, req.query.sort, req.query.order);
+    getList = async (req: FastifyRequest<{ Querystring: { filter: string, start: number, take: number, sort?: string, order?: 'DESC' | 'ASC', notValidated?: string } }>) => {
+        return await this.movieService.get(req.query.filter, req.query.start, req.query.take, req.query.sort, req.query.order, req.query.notValidated);
     };
 
     get = async (req: FastifyRequest<{ Params: { id: number }, Querystring: {lastOnError: string} }>, res: FastifyReply) => {
@@ -27,10 +27,9 @@ export class MovieController {
             const movie = await this.movieService.getById(req.session.playedMovies.pop());
             movie.errorCount++;
             if(movie.errorCount >= 5) {
-                await movie.softRemove();
-            } else {
-                await movie.save();
+                movie.validated = false;
             }
+            await movie.save();
         }
 
         if (req.params.id && req.params.id > 0) {
@@ -58,14 +57,11 @@ export class MovieController {
     }
 
     create = async (req: FastifyRequest<{Body: Movie}>) => {
-        if (!req.user.isAdmin) {
-            return new Error('NOT_ALLOWED');
-        }
-
         const movie = new Movie();
         movie.title = req.body.title;
         movie.subtitle = req.body.subtitle;
         movie.linkId = req.body.linkId;
+        movie.validated = req.user.isAdmin ? req.body.validated : false;
 
         if (req.body.author.id == null) {
             const author = new Author();
@@ -110,6 +106,8 @@ export class MovieController {
         movie.subtitle = movieRequest.subtitle;
         movie.linkId = movieRequest.linkId;
         movie.author = movieRequest.author;
+        movie.validated = movieRequest.validated;
+        movie.errorCount = 0;
 
         movie.tags = [];
         for (let tag of movieRequest.tags) {
@@ -147,7 +145,7 @@ export class MovieController {
      * @param req The request
      */
     private async getRandomMovie(req: FastifyRequest) {
-        let conditions:string[] = [];
+        let conditions:string[] = ['validated = 1'];
 
         // Filter movies to exclude already viewed movies
         const idFilter: number[] = [];

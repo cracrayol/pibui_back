@@ -25,6 +25,9 @@ export class Movie extends BaseEntity {
     @Column({ type: 'tinyint' })
     errorCount!: number;
 
+    @Column()
+    validated!: boolean;
+
     @ManyToOne(() => User, {
         onDelete: 'SET NULL'
     })
