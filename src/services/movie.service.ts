@@ -21,7 +21,7 @@ export class MovieService {
         
         if(filter != '') {
             builder = builder.andWhere('(MATCH(movie.title) AGAINST(:filter IN BOOLEAN MODE) OR MATCH(author.name) AGAINST(:filter IN BOOLEAN MODE))',
-                { filter: filter + '*' })
+                { filter })
         }
 
         if(sort !== undefined && sort !== null && sort.trim() != ''

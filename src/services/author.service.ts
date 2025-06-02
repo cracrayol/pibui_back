@@ -27,7 +27,7 @@ export class AuthorService {
 
         if(filter != '') {
             builder = builder.where('MATCH(author.name) AGAINST(:filter IN BOOLEAN MODE)',
-                { filter: filter + '*' })
+                { filter })
         }
 
         if (sort !== undefined && sort !== null && sort.trim() != ''
