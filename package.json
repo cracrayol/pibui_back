@@ -24,7 +24,7 @@
       "jsonwebtoken": "^9.0.2",
       "mysql": "^2.18.1",
       "reflect-metadata": "^0.2.2",
-      "typeorm": "0.3.22"
+      "typeorm": "^0.3.27"
    },
    "devDependencies": {
       "@tsconfig/node16-strictest-esm": "^1.0.3",

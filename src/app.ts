@@ -6,7 +6,7 @@ import fastifyStatic from '@fastify/static';
 import jwt from '@fastify/jwt';
 import cors from '@fastify/cors';
 import * as path from 'path';
-import * as expressSession from "express-session";
+import expressSession from "express-session";
 import expressMySqlSession from "express-mysql-session";
 
 import { configuration } from './config/configuration';
